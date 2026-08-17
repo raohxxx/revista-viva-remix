@@ -14,7 +14,7 @@ const OUTCOME_STYLES: Record<string, string> = {
   "Seguimiento pendiente": "bg-risk-medium-soft text-risk-medium border-risk-medium/30",
 };
 
-function Pill({ label, className }: { label: string; className?: string }) {
+function Pill({ label, className }: { label: string; className: string }) {
   return (
     <span
       className={cn(

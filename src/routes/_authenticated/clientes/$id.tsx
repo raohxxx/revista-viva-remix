@@ -171,8 +171,7 @@ function ClienteDetailPage() {
                 <CardContent>
                   <DataRow label="Plan" value={subscriber.plan} />
                   <DataRow label="Valor mensual" value={formatCLP(subscriber.monthly_value)} />
-                  <DataRow label="Canal de adquisición" value={subscriber.acquisition_channel} />
-                  <DataRow label="Región" value={subscriber.region} />
+                  <DataRow label="Estado" value={subscriber.subscription_status} />
                   <DataRow label="Inicio" value={formatDate(subscriber.subscription_start_date)} />
                   <DataRow
                     label="Renovación"
@@ -206,8 +205,12 @@ function ClienteDetailPage() {
                     value={formatNumber(subscriber.articles_read_30d)}
                   />
                   <DataRow
-                    label="Newsletters abiertas (30d)"
-                    value={formatNumber(subscriber.newsletter_opens_30d)}
+                    label="Apertura de newsletter"
+                    value={`${formatNumber(subscriber.newsletter_open_rate * 100)}%`}
+                  />
+                  <DataRow
+                    label="Tiempo medio de lectura"
+                    value={`${formatNumber(subscriber.avg_read_time_minutes, 1)} min`}
                   />
                   <DataRow
                     label="Último acceso"
@@ -225,11 +228,7 @@ function ClienteDetailPage() {
                 <CardContent>
                   <DataRow
                     label="Pagos fallidos (90d)"
-                    value={formatNumber(subscriber.failed_payments_90d)}
-                  />
-                  <DataRow
-                    label="Tickets de soporte (90d)"
-                    value={formatNumber(subscriber.support_tickets_90d)}
+                    value={formatNumber(subscriber.payment_failures_90d)}
                   />
                   <DataRow
                     label="Reclamos (90d)"

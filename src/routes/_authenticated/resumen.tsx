@@ -28,6 +28,7 @@ import { RiskScoreInline, RiskScoreTooltip } from "@/components/risk/RiskScore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePortfolio, useRiskHistory } from "@/hooks/usePortfolio";
+import type { RiskHistoryRow } from "@/types/domain";
 import { daysUntil, formatCLP, formatDate, formatNumber } from "@/lib/format";
 import {
   computeOverview,
@@ -92,7 +93,7 @@ function ResumenContent({
   history,
 }: {
   data: NonNullable<ReturnType<typeof usePortfolio>["data"]>;
-  history: { snapshot_date: string; average_score: number; high_risk_count: number }[];
+  history: RiskHistoryRow[];
 }) {
   const overview = computeOverview(data.items, data.actions);
   const priorities = computeTodayPriorities(data.items, 8);
@@ -100,8 +101,8 @@ function ResumenContent({
 
   const historyData = history.map((row) => ({
     date: formatDate(row.snapshot_date).slice(0, 5),
-    score: Number(row.average_score),
-    alto: row.high_risk_count,
+    alto: row.high_count + row.critical_count,
+    critico: row.critical_count,
   }));
 
   return (
@@ -179,7 +180,7 @@ function ResumenContent({
           <CardHeader>
             <CardTitle className="text-base">Evolución del riesgo</CardTitle>
             <CardDescription>
-              Score promedio de la cartera y volumen en riesgo alto por día
+              Volumen de suscriptores en riesgo alto y crítico por día
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -203,17 +204,17 @@ function ResumenContent({
                   />
                   <Line
                     type="monotone"
-                    dataKey="score"
-                    name="Score promedio"
-                    stroke="var(--primary)"
+                    dataKey="alto"
+                    name="Riesgo alto + crítico"
+                    stroke="var(--risk-high)"
                     strokeWidth={2}
                     dot={false}
                   />
                   <Line
                     type="monotone"
-                    dataKey="alto"
-                    name="Riesgo alto"
-                    stroke="var(--risk-high)"
+                    dataKey="critico"
+                    name="Riesgo crítico"
+                    stroke="var(--risk-critical)"
                     strokeWidth={2}
                     dot={false}
                   />
