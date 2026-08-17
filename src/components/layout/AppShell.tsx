@@ -6,7 +6,6 @@ import {
   Menu,
   Settings,
   ShieldCheck,
-  Upload,
   Users,
   Workflow,
 } from "lucide-react";
@@ -22,7 +21,6 @@ const NAV_ITEMS = [
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/intervenciones", label: "Intervenciones", icon: Workflow },
   { to: "/analisis", label: "Análisis", icon: BarChart3 },
-  { to: "/importar", label: "Importar datos", icon: Upload },
   { to: "/configuracion", label: "Configuración", icon: Settings },
 ] as const;
 
