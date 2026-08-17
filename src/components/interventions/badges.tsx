@@ -28,7 +28,7 @@ function Pill({ label, className }: { label: string; className: string }) {
 }
 
 export function StatusBadge({ status }: { status: string }) {
-  return <Pill label={status} className={STATUS_STYLES[status] ?? STATUS_STYLES["Pendiente"]} />;
+  return <Pill label={status} className={STATUS_STYLES[status] ?? "bg-muted text-muted-foreground border-border"} />;
 }
 
 export function OutcomeBadge({ outcome }: { outcome: string }) {

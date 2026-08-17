@@ -12,6 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAnalisisRouteImport } from './routes/_authenticated/analisis'
+import { Route as AuthenticatedConfiguracionRouteImport } from './routes/_authenticated/configuracion'
+import { Route as AuthenticatedIntervencionesRouteImport } from './routes/_authenticated/intervenciones'
 import { Route as AuthenticatedResumenRouteImport } from './routes/_authenticated/resumen'
 import { Route as AuthenticatedClientesIndexRouteImport } from './routes/_authenticated/clientes/index'
 import { Route as AuthenticatedClientesIdRouteImport } from './routes/_authenticated/clientes/$id'
@@ -30,6 +33,23 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAnalisisRoute = AuthenticatedAnalisisRouteImport.update({
+  id: '/analisis',
+  path: '/analisis',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedConfiguracionRoute =
+  AuthenticatedConfiguracionRouteImport.update({
+    id: '/configuracion',
+    path: '/configuracion',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedIntervencionesRoute =
+  AuthenticatedIntervencionesRouteImport.update({
+    id: '/intervenciones',
+    path: '/intervenciones',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedResumenRoute = AuthenticatedResumenRouteImport.update({
   id: '/resumen',
   path: '/resumen',
@@ -50,6 +70,9 @@ const AuthenticatedClientesIdRoute = AuthenticatedClientesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/analisis': typeof AuthenticatedAnalisisRoute
+  '/configuracion': typeof AuthenticatedConfiguracionRoute
+  '/intervenciones': typeof AuthenticatedIntervencionesRoute
   '/resumen': typeof AuthenticatedResumenRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/clientes/': typeof AuthenticatedClientesIndexRoute
@@ -57,6 +80,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/analisis': typeof AuthenticatedAnalisisRoute
+  '/configuracion': typeof AuthenticatedConfiguracionRoute
+  '/intervenciones': typeof AuthenticatedIntervencionesRoute
   '/resumen': typeof AuthenticatedResumenRoute
   '/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/clientes': typeof AuthenticatedClientesIndexRoute
@@ -66,20 +92,42 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/analisis': typeof AuthenticatedAnalisisRoute
+  '/_authenticated/configuracion': typeof AuthenticatedConfiguracionRoute
+  '/_authenticated/intervenciones': typeof AuthenticatedIntervencionesRoute
   '/_authenticated/resumen': typeof AuthenticatedResumenRoute
   '/_authenticated/clientes/$id': typeof AuthenticatedClientesIdRoute
   '/_authenticated/clientes/': typeof AuthenticatedClientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/resumen' | '/clientes/$id' | '/clientes/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/analisis'
+    | '/configuracion'
+    | '/intervenciones'
+    | '/resumen'
+    | '/clientes/$id'
+    | '/clientes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/resumen' | '/clientes/$id' | '/clientes'
+  to:
+    | '/'
+    | '/auth'
+    | '/analisis'
+    | '/configuracion'
+    | '/intervenciones'
+    | '/resumen'
+    | '/clientes/$id'
+    | '/clientes'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/analisis'
+    | '/_authenticated/configuracion'
+    | '/_authenticated/intervenciones'
     | '/_authenticated/resumen'
     | '/_authenticated/clientes/$id'
     | '/_authenticated/clientes/'
@@ -114,6 +162,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/analisis': {
+      id: '/_authenticated/analisis'
+      path: '/analisis'
+      fullPath: '/analisis'
+      preLoaderRoute: typeof AuthenticatedAnalisisRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/configuracion': {
+      id: '/_authenticated/configuracion'
+      path: '/configuracion'
+      fullPath: '/configuracion'
+      preLoaderRoute: typeof AuthenticatedConfiguracionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/intervenciones': {
+      id: '/_authenticated/intervenciones'
+      path: '/intervenciones'
+      fullPath: '/intervenciones'
+      preLoaderRoute: typeof AuthenticatedIntervencionesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/resumen': {
       id: '/_authenticated/resumen'
       path: '/resumen'
@@ -139,12 +208,18 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnalisisRoute: typeof AuthenticatedAnalisisRoute
+  AuthenticatedConfiguracionRoute: typeof AuthenticatedConfiguracionRoute
+  AuthenticatedIntervencionesRoute: typeof AuthenticatedIntervencionesRoute
   AuthenticatedResumenRoute: typeof AuthenticatedResumenRoute
   AuthenticatedClientesIdRoute: typeof AuthenticatedClientesIdRoute
   AuthenticatedClientesIndexRoute: typeof AuthenticatedClientesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnalisisRoute: AuthenticatedAnalisisRoute,
+  AuthenticatedConfiguracionRoute: AuthenticatedConfiguracionRoute,
+  AuthenticatedIntervencionesRoute: AuthenticatedIntervencionesRoute,
   AuthenticatedResumenRoute: AuthenticatedResumenRoute,
   AuthenticatedClientesIdRoute: AuthenticatedClientesIdRoute,
   AuthenticatedClientesIndexRoute: AuthenticatedClientesIndexRoute,
