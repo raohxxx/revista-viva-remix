@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 
 import { RiskBadge } from "@/components/risk/RiskBadge";
@@ -73,6 +73,8 @@ function SortHeader({
 }
 
 export function CustomerTable({ items, sortKey, sortDirection, onSort }: CustomerTableProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-card">
       <Table>
@@ -130,7 +132,7 @@ export function CustomerTable({ items, sortKey, sortDirection, onSort }: Custome
                   prediction.level === "critical" && "bg-risk-critical-soft/40",
                 )}
                 onClick={() => {
-                  window.location.assign(`/clientes/${subscriber.id}`);
+                  void navigate({ to: "/clientes/$id", params: { id: subscriber.id } });
                 }}
               >
                 <TableCell className="font-medium whitespace-nowrap">
