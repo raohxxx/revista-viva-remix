@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 
+import { DominantSignalBadge } from "@/components/risk/DominantSignalBadge";
+import { PriorityBadge } from "@/components/risk/PriorityBadge";
 import { RiskBadge } from "@/components/risk/RiskBadge";
 import { RiskScoreInline } from "@/components/risk/RiskScore";
 import { Button } from "@/components/ui/button";
@@ -15,18 +17,19 @@ import {
 import {
   daysSince,
   daysUntil,
+  formatCLP,
   formatDate,
   formatPercentChange,
-  formatTenure,
+  monthlyRevenue,
   percentChange,
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { SIGNAL_LABEL, type SubscriberWithRisk } from "@/types/domain";
+import type { SubscriberWithRisk } from "@/types/domain";
 
 import type { SortKey } from "./filters";
 
 const INTERVENTION_LABEL: Record<SubscriberWithRisk["interventionStatus"], string> = {
-  none: "Sin intervención",
+  none: "Sin gestión",
   open: "En curso",
   completed: "Completada",
 };
@@ -82,15 +85,29 @@ export function CustomerTable({ items, sortKey, sortDirection, onSort }: Custome
           <TableRow className="hover:bg-transparent">
             <TableHead>Cliente</TableHead>
             <TableHead>Plan</TableHead>
-            <TableHead>Antigüedad</TableHead>
             <SortHeader
-              label="Score"
+              label="MRR"
+              sortKey="value"
+              activeKey={sortKey}
+              direction={sortDirection}
+              onSort={onSort}
+            />
+            <SortHeader
+              label="Risk Score"
               sortKey="score"
               activeKey={sortKey}
               direction={sortDirection}
               onSort={onSort}
             />
-            <TableHead>Riesgo</TableHead>
+            <TableHead>Nivel</TableHead>
+            <TableHead>Señal dominante</TableHead>
+            <SortHeader
+              label="Prioridad"
+              sortKey="priority"
+              activeKey={sortKey}
+              direction={sortDirection}
+              onSort={onSort}
+            />
             <SortHeader
               label="Renovación"
               sortKey="renewal"
@@ -112,8 +129,7 @@ export function CustomerTable({ items, sortKey, sortDirection, onSort }: Custome
               direction={sortDirection}
               onSort={onSort}
             />
-            <TableHead>Principal señal</TableHead>
-            <TableHead>Intervención</TableHead>
+            <TableHead>Gestión</TableHead>
             <TableHead className="text-right">Acción</TableHead>
           </TableRow>
         </TableHeader>
@@ -135,20 +151,32 @@ export function CustomerTable({ items, sortKey, sortDirection, onSort }: Custome
                   void navigate({ to: "/clientes/$id", params: { id: subscriber.id } });
                 }}
               >
-                <TableCell className="font-medium whitespace-nowrap">
-                  {subscriber.customer_code}
+                <TableCell className="whitespace-nowrap">
+                  <span className="block font-medium text-foreground">
+                    {subscriber.full_name ?? subscriber.customer_code}
+                  </span>
+                  <span className="block text-[11px] text-muted-foreground">
+                    {subscriber.customer_code}
+                    {subscriber.email ? ` · ${subscriber.email}` : ""}
+                  </span>
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
                   {subscriber.plan}
                 </TableCell>
-                <TableCell className="whitespace-nowrap text-muted-foreground">
-                  {formatTenure(subscriber.subscription_start_date)}
+                <TableCell className="tabular whitespace-nowrap text-muted-foreground">
+                  {formatCLP(monthlyRevenue(subscriber))}
                 </TableCell>
                 <TableCell>
                   <RiskScoreInline score={prediction.score} level={prediction.level} />
                 </TableCell>
                 <TableCell>
                   <RiskBadge level={prediction.level} />
+                </TableCell>
+                <TableCell>
+                  <DominantSignalBadge signalKey={prediction.principalSignalKey} />
+                </TableCell>
+                <TableCell>
+                  <PriorityBadge score={item.priorityScore} />
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   <span className="text-foreground">{formatDate(subscriber.renewal_date)}</span>
@@ -171,18 +199,13 @@ export function CustomerTable({ items, sortKey, sortDirection, onSort }: Custome
                 >
                   {formatPercentChange(change)}
                 </TableCell>
-                <TableCell className="max-w-[180px] text-xs text-muted-foreground">
-                  {prediction.principalSignalKey
-                    ? SIGNAL_LABEL[prediction.principalSignalKey]
-                    : "Sin señales"}
-                </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {INTERVENTION_LABEL[item.interventionStatus]}
                 </TableCell>
                 <TableCell className="text-right" onClick={(event) => event.stopPropagation()}>
                   <Button asChild size="sm" variant="ghost">
                     <Link to="/clientes/$id" params={{ id: subscriber.id }}>
-                      Ver cliente
+                      Ver ficha
                     </Link>
                   </Button>
                 </TableCell>
