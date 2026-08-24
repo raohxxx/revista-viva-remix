@@ -1,7 +1,9 @@
-import { daysSince, daysUntil, percentChange } from "@/lib/format";
+import { daysSince, daysUntil, monthlyRevenue, percentChange } from "@/lib/format";
 import {
   DEFAULT_THRESHOLDS,
   SIGNAL_LABEL,
+  type PriorityLevel,
+  type Recommendation,
   type RiskLevel,
   type RiskPrediction,
   type RiskRule,
@@ -120,14 +122,6 @@ const evaluators: Record<SignalKey, SignalEvaluator> = {
   },
 };
 
-const RECOMMENDATIONS: Record<SignalKey, string> = {
-  activity_drop: "Enviar selección personalizada de contenidos relevantes.",
-  inactivity: "Reactivar con un resumen de lo más leído y recordatorio de beneficios.",
-  payment_failures: "Contactar para actualizar el medio de pago.",
-  renewal_proximity: "Intervención prioritaria antes de la renovación.",
-  low_satisfaction: "Contactar para comprender la causa de insatisfacción.",
-  complaints: "Contacto personalizado desde Retención.",
-};
 
 const PRINCIPAL_REASONS: Record<SignalKey, string> = {
   activity_drop: "Reducción significativa de actividad",
@@ -178,10 +172,7 @@ export function calculateRiskScore(
   const principal = contributing[0] ?? null;
   const level = classifyRisk(score, thresholds);
 
-  const renewalSoon = (daysUntil(subscriber.renewal_date) ?? 999) <= 15;
-  const escalate = renewalSoon && (level === "high" || level === "critical");
-
-  return {
+  const base: RiskPrediction = {
     score,
     level,
     signals: signals.sort((a, b) => b.points - a.points),
@@ -189,29 +180,173 @@ export function calculateRiskScore(
     principalReason: principal
       ? PRINCIPAL_REASONS[principal.key]
       : "Sin señales de riesgo relevantes",
-    recommendedAction: escalate
-      ? "Intervención prioritaria antes de la renovación."
-      : principal
-        ? RECOMMENDATIONS[principal.key]
-        : "Mantener seguimiento estándar. No requiere intervención.",
+    recommendedAction: "",
   };
+
+  return { ...base, recommendedAction: buildRecommendation(subscriber, base).action };
 }
 
 /**
  * Prioridad operacional (distinta del Risk Score): combina riesgo,
- * cercanía de renovación, valor económico y ausencia de intervención.
+ * cercanía de renovación, valor económico y señales críticas.
+ * Fórmula transparente, normalizada de 0 a 100.
  */
 export function calculatePriorityScore(
   subscriber: Subscriber,
   prediction: RiskPrediction,
   hasRecentIntervention: boolean,
 ): number {
-  const risk = prediction.score * 0.6;
+  const riskFactor = prediction.score * 0.55;
+
   const days = daysUntil(subscriber.renewal_date);
-  const renewal = days == null ? 0 : clamp((45 - days) / 45, 0, 1) * 20;
-  const value = clamp(subscriber.monthly_value / 20000, 0, 1) * 10;
-  const noIntervention = hasRecentIntervention ? 0 : 10;
-  return Math.round(clamp(risk + renewal + value + noIntervention, 0, 100));
+  const renewalUrgency = days == null ? 0 : clamp((60 - days) / 60, 0, 1) * 20;
+
+  const customerValueFactor = clamp(monthlyRevenue(subscriber) / 15000, 0, 1) * 15;
+
+  const paymentIssue = (subscriber.payment_failures_90d ?? 0) > 0 ? 8 : 0;
+  const criticalLevel = prediction.level === "critical" ? 4 : 0;
+  const untouched = hasRecentIntervention ? 0 : 3;
+  const criticalSignalBonus = paymentIssue + criticalLevel + untouched;
+
+  return Math.round(
+    clamp(riskFactor + renewalUrgency + customerValueFactor + criticalSignalBonus, 0, 100),
+  );
+}
+
+export function classifyPriority(priorityScore: number): PriorityLevel {
+  if (priorityScore >= 80) return "very_high";
+  if (priorityScore >= 60) return "high";
+  if (priorityScore >= 40) return "medium";
+  return "low";
+}
+
+/** Señal dominante: la que más puntos aporta al Risk Score. */
+export function dominantSignal(prediction: RiskPrediction): SignalKey | null {
+  const contributing = prediction.signals
+    .filter((signal) => signal.points > 0)
+    .sort((a, b) => b.points - a.points);
+  return contributing[0]?.key ?? null;
+}
+
+/** Explicación en lenguaje sencillo construida desde las señales activas. */
+export function buildExplanation(subscriber: Subscriber, prediction: RiskPrediction): string {
+  const active = prediction.signals.filter((s) => s.points > 0).map((s) => s.key);
+  if (active.length === 0) {
+    return "Este cliente no presenta señales relevantes de riesgo: su actividad, pagos y satisfacción se mantienen dentro de los rangos esperados.";
+  }
+
+  const phrases: string[] = [];
+  if (active.includes("activity_drop")) phrases.push("una caída relevante de su actividad");
+  if (active.includes("inactivity")) phrases.push("varios días sin ingresar a la plataforma");
+  if (active.includes("payment_failures")) phrases.push("problemas en el cobro de su suscripción");
+  if (active.includes("low_satisfaction")) phrases.push("una satisfacción declarada baja");
+  if (active.includes("complaints")) phrases.push("reclamos recientes en soporte");
+
+  const days = daysUntil(subscriber.renewal_date);
+  const renewalPhrase =
+    active.includes("renewal_proximity") && days != null
+      ? days < 0
+        ? " Su renovación ya venció, por lo que la gestión es inmediata."
+        : ` Su renovación ocurre en ${days} día(s), por lo que conviene intervenir antes de esa fecha.`
+      : "";
+
+  const list =
+    phrases.length === 0
+      ? "una renovación muy próxima"
+      : phrases.length === 1
+        ? phrases[0]
+        : `${phrases.slice(0, -1).join(", ")} y ${phrases[phrases.length - 1]}`;
+
+  return `Este cliente presenta ${list}.${renewalPhrase}`;
+}
+
+/**
+ * Motor de recomendaciones por reglas: la acción depende de la combinación
+ * real de señales activas, no de textos genéricos.
+ */
+export function buildRecommendation(
+  subscriber: Subscriber,
+  prediction: RiskPrediction,
+): Recommendation {
+  const active = new Set(prediction.signals.filter((s) => s.points > 0).map((s) => s.key));
+  const days = daysUntil(subscriber.renewal_date);
+  const renewalSoon = days != null && days <= 15;
+  const criticalCount = [
+    active.has("payment_failures"),
+    active.has("low_satisfaction"),
+    active.has("complaints"),
+    active.has("activity_drop"),
+  ].filter(Boolean).length;
+
+  if (criticalCount >= 3) {
+    return {
+      action: "Priorizar llamada personalizada del equipo de Retención.",
+      reason: "Concentra varias señales críticas al mismo tiempo.",
+      urgency: "Inmediata",
+      actionType: "Llamada",
+    };
+  }
+
+  if (active.has("payment_failures")) {
+    return {
+      action: "Contactar al cliente para actualizar el medio de pago antes de la renovación.",
+      reason: `Registra ${subscriber.payment_failures_90d} intento(s) de cobro rechazado(s) en los últimos 90 días.`,
+      urgency: renewalSoon ? "Inmediata" : "Esta semana",
+      actionType: "Soporte de pago",
+    };
+  }
+
+  if (active.has("complaints")) {
+    return {
+      action: "Realizar seguimiento después de la resolución del reclamo.",
+      reason: `Tiene ${subscriber.complaints_90d} reclamo(s) registrado(s) en los últimos 90 días.`,
+      urgency: "Esta semana",
+      actionType: "Seguimiento",
+    };
+  }
+
+  if (active.has("low_satisfaction")) {
+    return {
+      action: "Realizar una llamada personalizada para comprender la causa de insatisfacción.",
+      reason: `Su satisfacción declarada es ${subscriber.satisfaction_score}/10.`,
+      urgency: renewalSoon ? "Inmediata" : "Esta semana",
+      actionType: "Llamada",
+    };
+  }
+
+  if (renewalSoon && (active.has("activity_drop") || active.has("inactivity"))) {
+    return {
+      action: "Contactar antes de la renovación y evaluar un incentivo de retención.",
+      reason: "Baja actividad con la renovación muy próxima.",
+      urgency: "Inmediata",
+      actionType: "Oferta",
+    };
+  }
+
+  if (active.has("activity_drop") || active.has("inactivity")) {
+    return {
+      action: "Reactivar engagement con contenido personalizado o comunicación dirigida.",
+      reason: "Su consumo de contenidos cayó respecto del período anterior.",
+      urgency: "Programada",
+      actionType: "Contenido personalizado",
+    };
+  }
+
+  if (active.has("renewal_proximity")) {
+    return {
+      action: "Enviar recordatorio de beneficios antes de la fecha de renovación.",
+      reason: days == null ? "Renovación próxima." : `Renueva en ${days} día(s).`,
+      urgency: "Programada",
+      actionType: "Email",
+    };
+  }
+
+  return {
+    action: "Mantener seguimiento estándar. No requiere intervención.",
+    reason: "No hay señales de riesgo relevantes.",
+    urgency: "Sin urgencia",
+    actionType: "Email",
+  };
 }
 
 export function mapRuleRow(row: {

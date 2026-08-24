@@ -99,9 +99,9 @@ export async function fetchPortfolio(): Promise<Portfolio> {
     return {
       subscriber,
       prediction,
-      priorityScore: row
-        ? Number(row.priority_score)
-        : calculatePriorityScore(subscriber, prediction, subscriberActions.length > 0),
+      // La prioridad se recalcula siempre: depende de la fecha actual y del
+      // estado de gestión, que cambian entre snapshots persistidos.
+      priorityScore: calculatePriorityScore(subscriber, prediction, subscriberActions.length > 0),
       interventionStatus,
       lastActionAt: subscriberActions[0]?.created_at ?? null,
     };

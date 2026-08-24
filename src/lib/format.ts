@@ -101,3 +101,15 @@ export function tenureMonths(startDate: string | null | undefined): number {
   const days = daysSince(startDate);
   return days == null ? 0 : Math.floor(days / 30);
 }
+
+/**
+ * Ingreso mensual equivalente (MRR) de un suscriptor.
+ * Los planes anuales guardan el precio de lista anual: se divide por 12.
+ */
+export function monthlyRevenue(subscriber: {
+  monthly_value: number;
+  billing_period?: string | null;
+}): number {
+  const value = Number(subscriber.monthly_value) || 0;
+  return subscriber.billing_period === "anual" ? Math.round(value / 12) : value;
+}

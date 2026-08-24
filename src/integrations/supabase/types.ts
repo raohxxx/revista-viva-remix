@@ -182,9 +182,12 @@ export type Database = {
           articles_read_30d: number
           articles_read_previous_30d: number
           avg_read_time_minutes: number
+          billing_period: string
           complaints_90d: number
           created_at: string
           customer_code: string
+          email: string
+          full_name: string
           id: string
           is_demo: boolean
           last_access_at: string | null
@@ -206,9 +209,12 @@ export type Database = {
           articles_read_30d?: number
           articles_read_previous_30d?: number
           avg_read_time_minutes?: number
+          billing_period?: string
           complaints_90d?: number
           created_at?: string
           customer_code: string
+          email?: string
+          full_name?: string
           id?: string
           is_demo?: boolean
           last_access_at?: string | null
@@ -230,9 +236,12 @@ export type Database = {
           articles_read_30d?: number
           articles_read_previous_30d?: number
           avg_read_time_minutes?: number
+          billing_period?: string
           complaints_90d?: number
           created_at?: string
           customer_code?: string
+          email?: string
+          full_name?: string
           id?: string
           is_demo?: boolean
           last_access_at?: string | null

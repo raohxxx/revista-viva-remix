@@ -56,7 +56,7 @@ export function FilterBar({
           />
           <Input
             className="pl-9"
-            placeholder="Buscar por código de cliente (ej: RV-10482)"
+            placeholder="Buscar por nombre, email o código (ej: RV-10482)"
             value={filters.search}
             onChange={(event) => onChange({ ...filters, search: event.target.value })}
             aria-label="Buscar cliente"
@@ -76,6 +76,24 @@ export function FilterBar({
                 {option.label}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={filters.priority}
+          onValueChange={(value) =>
+            onChange({ ...filters, priority: value as CustomerFilters["priority"] })
+          }
+        >
+          <SelectTrigger className="w-[170px]" aria-label="Filtrar por prioridad">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toda prioridad</SelectItem>
+            <SelectItem value="very_high">Prioridad muy alta</SelectItem>
+            <SelectItem value="high">Prioridad alta</SelectItem>
+            <SelectItem value="medium">Prioridad media</SelectItem>
+            <SelectItem value="low">Prioridad baja</SelectItem>
           </SelectContent>
         </Select>
 
