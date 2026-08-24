@@ -81,10 +81,12 @@ export interface SubscriberWithRisk {
 }
 
 export const ACTION_TYPES = [
-  "Email",
   "Llamada",
-  "Encuesta",
+  "Email",
+  "WhatsApp",
   "Oferta",
+  "Seguimiento",
+  "Encuesta",
   "Contenido personalizado",
   "Soporte de pago",
   "Otro",
@@ -94,11 +96,52 @@ export const ACTION_STATUSES = ["Pendiente", "Programada", "En curso", "Completa
 
 export const ACTION_OUTCOMES = [
   "Retenido",
-  "Canceló",
   "Sin respuesta",
   "Seguimiento pendiente",
+  "Rechazó oferta",
+  "Canceló",
 ] as const;
 
 export type ActionType = (typeof ACTION_TYPES)[number];
 export type ActionStatus = (typeof ACTION_STATUSES)[number];
 export type ActionOutcome = (typeof ACTION_OUTCOMES)[number];
+
+/** Equipo de Retención (datos de demostración). */
+export const TEAM_MEMBERS = ["Jorge Molina", "Camila Soto", "Luis Herrera"] as const;
+
+/** Señal dominante: causa principal del riesgo, en lenguaje de negocio. */
+export interface DominantSignalMeta {
+  emoji: string;
+  label: string;
+}
+
+export const DOMINANT_SIGNAL: Record<SignalKey, DominantSignalMeta> = {
+  payment_failures: { emoji: "💳", label: "Problemas de pago" },
+  activity_drop: { emoji: "📉", label: "Caída de engagement" },
+  inactivity: { emoji: "📉", label: "Inactividad prolongada" },
+  low_satisfaction: { emoji: "😡", label: "Insatisfacción" },
+  renewal_proximity: { emoji: "📅", label: "Renovación próxima" },
+  complaints: { emoji: "🆘", label: "Soporte / reclamos" },
+};
+
+export const NO_DOMINANT_SIGNAL: DominantSignalMeta = {
+  emoji: "✅",
+  label: "Sin señales importantes",
+};
+
+export type PriorityLevel = "very_high" | "high" | "medium" | "low";
+
+export const PRIORITY_LABEL: Record<PriorityLevel, string> = {
+  very_high: "Muy alta",
+  high: "Alta",
+  medium: "Media",
+  low: "Baja",
+};
+
+/** Recomendación operativa derivada de las señales activas. */
+export interface Recommendation {
+  action: string;
+  reason: string;
+  urgency: "Inmediata" | "Esta semana" | "Programada" | "Sin urgencia";
+  actionType: ActionType;
+}
