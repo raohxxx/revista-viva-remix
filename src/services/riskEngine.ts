@@ -122,14 +122,6 @@ const evaluators: Record<SignalKey, SignalEvaluator> = {
   },
 };
 
-const RECOMMENDATIONS: Record<SignalKey, string> = {
-  activity_drop: "Enviar selección personalizada de contenidos relevantes.",
-  inactivity: "Reactivar con un resumen de lo más leído y recordatorio de beneficios.",
-  payment_failures: "Contactar para actualizar el medio de pago.",
-  renewal_proximity: "Intervención prioritaria antes de la renovación.",
-  low_satisfaction: "Contactar para comprender la causa de insatisfacción.",
-  complaints: "Contacto personalizado desde Retención.",
-};
 
 const PRINCIPAL_REASONS: Record<SignalKey, string> = {
   activity_drop: "Reducción significativa de actividad",
