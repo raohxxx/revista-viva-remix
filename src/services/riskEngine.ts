@@ -1,7 +1,9 @@
-import { daysSince, daysUntil, percentChange } from "@/lib/format";
+import { daysSince, daysUntil, monthlyRevenue, percentChange } from "@/lib/format";
 import {
   DEFAULT_THRESHOLDS,
   SIGNAL_LABEL,
+  type PriorityLevel,
+  type Recommendation,
   type RiskLevel,
   type RiskPrediction,
   type RiskRule,
