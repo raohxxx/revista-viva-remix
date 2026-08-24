@@ -180,10 +180,7 @@ export function calculateRiskScore(
   const principal = contributing[0] ?? null;
   const level = classifyRisk(score, thresholds);
 
-  const renewalSoon = (daysUntil(subscriber.renewal_date) ?? 999) <= 15;
-  const escalate = renewalSoon && (level === "high" || level === "critical");
-
-  return {
+  const base: RiskPrediction = {
     score,
     level,
     signals: signals.sort((a, b) => b.points - a.points),
@@ -191,12 +188,10 @@ export function calculateRiskScore(
     principalReason: principal
       ? PRINCIPAL_REASONS[principal.key]
       : "Sin señales de riesgo relevantes",
-    recommendedAction: escalate
-      ? "Intervención prioritaria antes de la renovación."
-      : principal
-        ? RECOMMENDATIONS[principal.key]
-        : "Mantener seguimiento estándar. No requiere intervención.",
+    recommendedAction: "",
   };
+
+  return { ...base, recommendedAction: buildRecommendation(subscriber, base).action };
 }
 
 /**
