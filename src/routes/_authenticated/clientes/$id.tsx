@@ -56,15 +56,6 @@ function DataRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function suggestedType(action: string): ActionType {
-  const lower = action.toLowerCase();
-  if (lower.includes("pago")) return "Soporte de pago";
-  if (lower.includes("llam")) return "Llamada";
-  if (lower.includes("oferta") || lower.includes("descuento")) return "Oferta";
-  if (lower.includes("encuesta")) return "Encuesta";
-  if (lower.includes("contenido")) return "Contenido personalizado";
-  return "Email";
-}
 
 function ClienteDetailPage() {
   const { id } = Route.useParams();
