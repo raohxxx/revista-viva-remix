@@ -6,6 +6,8 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { QueryState } from "@/components/common/QueryState";
 import { InterventionDialog } from "@/components/interventions/InterventionDialog";
 import { InterventionTimeline } from "@/components/interventions/InterventionTimeline";
+import { DominantSignalBadge } from "@/components/risk/DominantSignalBadge";
+import { PriorityBadge } from "@/components/risk/PriorityBadge";
 import { RiskBadge } from "@/components/risk/RiskBadge";
 import { RiskScoreGauge, RiskScoreTooltip } from "@/components/risk/RiskScore";
 import { RiskSignals } from "@/components/risk/RiskSignals";
@@ -21,9 +23,10 @@ import {
   formatNumber,
   formatPercentChange,
   formatTenure,
+  monthlyRevenue,
   percentChange,
 } from "@/lib/format";
-import type { ActionType } from "@/types/domain";
+import { buildExplanation, buildRecommendation } from "@/services/riskEngine";
 
 export const Route = createFileRoute("/_authenticated/clientes/$id")({
   head: () => ({
