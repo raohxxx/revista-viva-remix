@@ -1,4 +1,4 @@
-import { daysUntil } from "@/lib/format";
+import { daysUntil, monthlyRevenue } from "@/lib/format";
 import {
   SIGNAL_LABEL,
   type RetentionAction,
@@ -34,7 +34,7 @@ export function computeOverview(
     (i) => i.prediction.level === "high" || i.prediction.level === "critical",
   );
   const critical = items.filter((i) => i.prediction.level === "critical");
-  const revenueAtRisk = highRisk.reduce((sum, i) => sum + i.subscriber.monthly_value, 0);
+  const revenueAtRisk = highRisk.reduce((sum, i) => sum + monthlyRevenue(i.subscriber), 0);
   const renewals30d = items.filter((i) => {
     const days = daysUntil(i.subscriber.renewal_date);
     return days != null && days >= 0 && days <= 30;
@@ -140,7 +140,7 @@ export function computeFunnel(
 
   const revenueRetained = items
     .filter((i) => retainedIds.has(i.subscriber.id))
-    .reduce((sum, i) => sum + i.subscriber.monthly_value, 0);
+    .reduce((sum, i) => sum + monthlyRevenue(i.subscriber), 0);
 
   return {
     total: items.length,
@@ -155,7 +155,7 @@ export function computeFunnel(
     criticalContacted: criticalItems.filter((i) => contactedIds.has(i.subscriber.id)).length,
     criticalTotal: criticalItems.length,
     revenueRetained,
-    revenueAtRisk: atRisk.reduce((sum, i) => sum + i.subscriber.monthly_value, 0),
+    revenueAtRisk: atRisk.reduce((sum, i) => sum + monthlyRevenue(i.subscriber), 0),
   };
 }
 
