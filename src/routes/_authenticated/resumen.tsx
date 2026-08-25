@@ -311,12 +311,12 @@ function ResumenContent({
           <CardHeader className="flex-row items-center justify-between gap-2 space-y-0">
             <div>
               <CardTitle className="flex items-center gap-1.5 text-base">
-                Prioridades del día
+                Lista de acción inmediata
                 <RiskScoreTooltip />
               </CardTitle>
               <CardDescription>
-                Combina Risk Score, cercanía de renovación, valor del plan y ausencia de gestión
-                previa.
+                Ordenada por Priority Score: riesgo, cercanía de renovación, valor del cliente y
+                señales críticas.
               </CardDescription>
             </div>
             <Button asChild variant="outline" size="sm">
@@ -324,6 +324,11 @@ function ResumenContent({
             </Button>
           </CardHeader>
           <CardContent className="space-y-2">
+            {priorities.length === 0 && (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                No hay clientes que requieran acción inmediata.
+              </p>
+            )}
             {priorities.map((item) => {
               const days = daysUntil(item.subscriber.renewal_date);
               return (
@@ -333,23 +338,27 @@ function ResumenContent({
                   params={{ id: item.subscriber.id }}
                   className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border px-3 py-2.5 transition-colors hover:bg-accent"
                 >
-                  <div className="min-w-[160px]">
+                  <div className="min-w-[170px]">
                     <p className="text-sm font-medium text-foreground">
-                      {item.subscriber.customer_code}
+                      {item.subscriber.full_name ?? item.subscriber.customer_code}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {item.subscriber.plan} · {formatCLP(item.subscriber.monthly_value)}/mes
+                      {item.subscriber.plan} · {formatCLP(monthlyRevenue(item.subscriber))}/mes
                     </p>
                   </div>
-                  <p className="min-w-[220px] flex-1 text-xs text-muted-foreground">
-                    {item.prediction.principalReason}
-                  </p>
-                  <div className="flex items-center gap-3">
+                  <div className="min-w-[220px] flex-1 space-y-1">
+                    <DominantSignalBadge signalKey={item.prediction.principalSignalKey} />
+                    <p className="text-xs text-muted-foreground">
+                      {item.prediction.recommendedAction}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">
                       {days == null ? "—" : days < 0 ? "Renovación vencida" : `Renueva en ${days}d`}
                     </span>
                     <RiskScoreInline score={item.prediction.score} level={item.prediction.level} />
                     <RiskBadge level={item.prediction.level} />
+                    <PriorityBadge score={item.priorityScore} />
                   </div>
                 </Link>
               );
