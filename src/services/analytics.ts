@@ -173,3 +173,74 @@ export function computeTodayPriorities(items: SubscriberWithRisk[], limit = 5): 
     .sort((a, b) => b.priorityScore - a.priorityScore || b.prediction.score - a.prediction.score)
     .slice(0, limit);
 }
+
+export interface DominantCauseRow {
+  key: SignalKey;
+  label: string;
+  clients: number;
+  mrr: number;
+  share: number;
+}
+
+/**
+ * Distribución de la cartera por causa dominante (una causa por cliente),
+ * para responder "por qué se nos van" en lenguaje de negocio.
+ */
+export function computeDominantCauses(items: SubscriberWithRisk[]): DominantCauseRow[] {
+  const map = new Map<SignalKey, { clients: number; mrr: number }>();
+  let totalWithCause = 0;
+
+  for (const item of items) {
+    const key = item.prediction.principalSignalKey;
+    if (!key) continue;
+    totalWithCause += 1;
+    const entry = map.get(key) ?? { clients: 0, mrr: 0 };
+    entry.clients += 1;
+    entry.mrr += monthlyRevenue(item.subscriber);
+    map.set(key, entry);
+  }
+
+  return [...map.entries()]
+    .map(([key, entry]) => ({
+      key,
+      label: SIGNAL_LABEL[key] ?? key,
+      clients: entry.clients,
+      mrr: entry.mrr,
+      share: totalWithCause === 0 ? 0 : (entry.clients / totalWithCause) * 100,
+    }))
+    .sort((a, b) => b.clients - a.clients);
+}
+
+export interface ImpactScenario {
+  targetClients: number;
+  targetMRR: number;
+  retentionRate: number;
+  mrrSaved: number;
+  annualSaved: number;
+}
+
+/**
+ * Escenario de impacto: si se gestiona a los N clientes de mayor prioridad
+ * con una tasa de retención estimada, cuánto MRR se protege.
+ */
+export function computeImpactScenario(
+  items: SubscriberWithRisk[],
+  topN = 10,
+  retentionRate = 0.4,
+): ImpactScenario {
+  const targets = [...items]
+    .filter((i) => i.prediction.level === "high" || i.prediction.level === "critical")
+    .sort((a, b) => b.priorityScore - a.priorityScore)
+    .slice(0, topN);
+
+  const targetMRR = targets.reduce((sum, i) => sum + monthlyRevenue(i.subscriber), 0);
+  const mrrSaved = Math.round(targetMRR * retentionRate);
+
+  return {
+    targetClients: targets.length,
+    targetMRR,
+    retentionRate,
+    mrrSaved,
+    annualSaved: mrrSaved * 12,
+  };
+}
