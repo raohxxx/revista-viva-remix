@@ -1,11 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  AlertOctagon,
-  CalendarClock,
-  CircleDollarSign,
-  TrendingDown,
-  Users,
-} from "lucide-react";
+import { CalendarClock, CircleDollarSign, Sparkles, TrendingDown, Users } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -22,15 +16,19 @@ import {
 import { MetricCard } from "@/components/common/MetricCard";
 import { PageHeader } from "@/components/common/PageHeader";
 import { QueryState } from "@/components/common/QueryState";
+import { DominantSignalBadge } from "@/components/risk/DominantSignalBadge";
+import { PriorityBadge } from "@/components/risk/PriorityBadge";
 import { RiskBadge } from "@/components/risk/RiskBadge";
 import { RISK_HEX } from "@/components/risk/RiskBadge";
 import { RiskScoreInline, RiskScoreTooltip } from "@/components/risk/RiskScore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePortfolio, useRiskHistory } from "@/hooks/usePortfolio";
-import type { RiskHistoryRow } from "@/types/domain";
-import { daysUntil, formatCLP, formatDate, formatNumber } from "@/lib/format";
+import { DOMINANT_SIGNAL, type RiskHistoryRow } from "@/types/domain";
+import { daysUntil, formatCLP, formatDate, formatNumber, monthlyRevenue } from "@/lib/format";
 import {
+  computeDominantCauses,
+  computeImpactScenario,
   computeOverview,
   computeSignalRanking,
   computeTodayPriorities,
