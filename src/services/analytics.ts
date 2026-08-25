@@ -44,6 +44,7 @@ export function computeOverview(
     return days != null && days >= 0 && days <= 30;
   }).length;
 
+  const totalMRR = items.reduce((sum, i) => sum + monthlyRevenue(i.subscriber), 0);
   const levels: RiskLevel[] = ["low", "medium", "high", "critical"];
 
   return {
@@ -52,6 +53,8 @@ export function computeOverview(
     highRiskPct: totalActive === 0 ? 0 : (highRisk.length / totalActive) * 100,
     critical: critical.length,
     revenueAtRisk,
+    totalMRR,
+    mrrAtRiskPct: totalMRR === 0 ? 0 : (revenueAtRisk / totalMRR) * 100,
     renewals30d,
     churnObserved: actions.filter((a) => a.outcome === "Canceló").length,
     distribution: levels.map((level) => ({
