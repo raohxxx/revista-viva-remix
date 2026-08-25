@@ -105,44 +105,127 @@ function ResumenContent({
     critico: row.critical_count,
   }));
 
+  const scenario = computeImpactScenario(data.items, 10, 0.4);
+  const causes = computeDominantCauses(data.items).slice(0, 6);
+  const topAction = priorities[0] ?? null;
+
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          label="Suscriptores activos"
-          value={formatNumber(overview.totalActive)}
-          icon={Users}
-          hint="Cartera vigente en seguimiento"
+          label="MRR total de la cartera"
+          value={formatCLP(overview.totalMRR)}
+          icon={CircleDollarSign}
+          tooltip="Ingreso mensual recurrente de los suscriptores activos. Los planes anuales se contabilizan como su equivalente mensual."
+          hint={`${formatNumber(overview.totalActive)} suscriptores activos`}
         />
         <MetricCard
-          label="En riesgo alto"
-          value={`${formatNumber(overview.highRisk)} (${overview.highRiskPct.toFixed(0)}%)`}
+          label="MRR en riesgo"
+          value={formatCLP(overview.revenueAtRisk)}
           icon={TrendingDown}
+          accent="critical"
+          tooltip="Suma del MRR de los suscriptores en riesgo Alto y Crítico. Es una estimación de exposición, no una pérdida confirmada."
+          hint={`${overview.mrrAtRiskPct.toFixed(1)}% del MRR total`}
+        />
+        <MetricCard
+          label="Clientes en riesgo"
+          value={`${formatNumber(overview.highRisk)} (${overview.highRiskPct.toFixed(0)}%)`}
+          icon={Users}
           accent="high"
           tooltip="Suscriptores con Risk Score en nivel Alto o Crítico según los umbrales configurados."
           hint={`${overview.critical} en nivel crítico`}
         />
         <MetricCard
-          label="Ingresos en riesgo"
-          value={formatCLP(overview.revenueAtRisk)}
-          icon={CircleDollarSign}
-          accent="critical"
-          tooltip="Suma del valor mensual de los suscriptores en riesgo Alto y Crítico. Es una estimación, no una pérdida confirmada."
-          hint="Valor mensual recurrente expuesto"
-        />
-        <MetricCard
           label="Renovaciones 30 días"
           value={formatNumber(overview.renewals30d)}
           icon={CalendarClock}
-          hint="Ventana crítica de decisión"
+          tooltip="Suscriptores cuya renovación ocurre dentro de los próximos 30 días: la ventana donde la gestión tiene mayor efecto."
+          hint={`${overview.churnObserved} cancelaciones registradas`}
         />
-        <MetricCard
-          label="Cancelaciones registradas"
-          value={formatNumber(overview.churnObserved)}
-          icon={AlertOctagon}
-          tooltip="Intervenciones cuyo resultado registrado fue 'Canceló'. Refleja lo observado por el equipo, no una tasa de churn calibrada."
-          hint="Según resultados de intervenciones"
-        />
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        <Card className="border-primary/30 bg-primary/5 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Sparkles className="h-4 w-4 text-primary" aria-hidden />
+              Acción recomendada hoy
+            </CardTitle>
+            <CardDescription>
+              La decisión de mayor impacto según prioridad, valor y cercanía de renovación.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {topAction ? (
+              <>
+                <p className="text-sm text-foreground">
+                  Contactar a{" "}
+                  <span className="font-semibold">
+                    {topAction.subscriber.full_name ?? topAction.subscriber.customer_code}
+                  </span>{" "}
+                  ({formatCLP(monthlyRevenue(topAction.subscriber))}/mes) —{" "}
+                  {topAction.prediction.recommendedAction}
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <RiskBadge level={topAction.prediction.level} />
+                  <DominantSignalBadge signalKey={topAction.prediction.principalSignalKey} />
+                  <PriorityBadge score={topAction.priorityScore} />
+                  <Button asChild size="sm">
+                    <Link to="/clientes/$id" params={{ id: topAction.subscriber.id }}>
+                      Abrir ficha
+                    </Link>
+                  </Button>
+                </div>
+                <p className="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
+                  Si gestionas los {scenario.targetClients} clientes de mayor prioridad (
+                  {formatCLP(scenario.targetMRR)}/mes) y retienes al{" "}
+                  {(scenario.retentionRate * 100).toFixed(0)}%, proteges aproximadamente{" "}
+                  <span className="font-medium text-foreground">
+                    {formatCLP(scenario.mrrSaved)}/mes
+                  </span>{" "}
+                  ({formatCLP(scenario.annualSaved)} al año). Escenario estimado con supuestos de
+                  demostración.
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No hay clientes en riesgo alto o crítico. Mantén el seguimiento estándar.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Por qué están en riesgo</CardTitle>
+            <CardDescription>Causa dominante por cliente</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {causes.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sin causas de riesgo detectadas.</p>
+            ) : (
+              causes.map((cause) => (
+                <div key={cause.key} className="space-y-1">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="flex items-center gap-1.5 text-foreground">
+                      <span aria-hidden>{DOMINANT_SIGNAL[cause.key].emoji}</span>
+                      {DOMINANT_SIGNAL[cause.key].label}
+                    </span>
+                    <span className="tabular text-muted-foreground">
+                      {cause.clients} · {formatCLP(cause.mrr)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                    <span
+                      className="block h-full rounded-full bg-primary"
+                      style={{ width: `${cause.share}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
