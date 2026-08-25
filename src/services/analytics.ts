@@ -13,6 +13,10 @@ export interface OverviewMetrics {
   highRiskPct: number;
   critical: number;
   revenueAtRisk: number;
+  /** MRR total de la cartera activa. */
+  totalMRR: number;
+  /** Porcentaje del MRR total que está en riesgo alto o crítico. */
+  mrrAtRiskPct: number;
   renewals30d: number;
   churnObserved: number;
   distribution: { level: RiskLevel; label: string; count: number }[];
