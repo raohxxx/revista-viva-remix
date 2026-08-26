@@ -57,19 +57,15 @@ function predictionFromRow(row: {
  * + estado de intervención. Si faltan evaluaciones, se calculan y persisten.
  */
 export async function fetchPortfolio(): Promise<Portfolio> {
-  const [subscribers, actions] = await Promise.all([fetchSubscribers(), fetchActions()]);
+  const [subscribers, actions, config] = await Promise.all([
+    fetchSubscribers(),
+    fetchActions(),
+    fetchRulesConfig(),
+  ]);
 
-  let { data: assessments, error } = await supabase.from("risk_assessments").select("*");
-  if (error) throw new Error(`No fue posible cargar las evaluaciones de riesgo: ${error.message}`);
-
-  if ((assessments?.length ?? 0) < subscribers.length) {
-    await recalculateScores();
-    const refreshed = await supabase.from("risk_assessments").select("*");
-    if (refreshed.error) throw new Error(refreshed.error.message);
-    assessments = refreshed.data;
-  }
-
-  const assessmentBySubscriber = new Map((assessments ?? []).map((a) => [a.subscriber_id, a]));
+  // Las señales se recalculan siempre con las reglas vigentes y la fecha de hoy,
+  // para que la explicación mostrada nunca quede desfasada del snapshot guardado.
+  const predictions = await predictChurnBatch(subscribers, config.rules, config.thresholds);
 
   const actionsBySubscriber = new Map<string, RetentionAction[]>();
   for (const action of actions) {
@@ -78,18 +74,8 @@ export async function fetchPortfolio(): Promise<Portfolio> {
     actionsBySubscriber.set(action.subscriber_id, list);
   }
 
-  const items: SubscriberWithRisk[] = subscribers.map((subscriber) => {
-    const row = assessmentBySubscriber.get(subscriber.id);
-    const prediction: RiskPrediction = row
-      ? predictionFromRow(row)
-      : {
-          score: 0,
-          level: "low",
-          signals: [],
-          principalReason: "Sin evaluación disponible",
-          principalSignalKey: null,
-          recommendedAction: "Recalcular el modelo de riesgo.",
-        };
+  const items: SubscriberWithRisk[] = subscribers.map((subscriber, index) => {
+    const prediction: RiskPrediction = predictions[index]!;
 
     const subscriberActions = actionsBySubscriber.get(subscriber.id) ?? [];
     const hasOpen = subscriberActions.some((a) => OPEN_STATUSES.has(a.status));
@@ -99,13 +85,12 @@ export async function fetchPortfolio(): Promise<Portfolio> {
     return {
       subscriber,
       prediction,
-      // La prioridad se recalcula siempre: depende de la fecha actual y del
-      // estado de gestión, que cambian entre snapshots persistidos.
       priorityScore: calculatePriorityScore(subscriber, prediction, subscriberActions.length > 0),
       interventionStatus,
       lastActionAt: subscriberActions[0]?.created_at ?? null,
     };
   });
+
 
   return { items, actions, byId: new Map(items.map((item) => [item.subscriber.id, item])) };
 }
