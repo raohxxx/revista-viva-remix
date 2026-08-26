@@ -148,12 +148,18 @@ export function InterventionDialog({
 
             <div className="space-y-1.5">
               <Label htmlFor="action-owner">Responsable</Label>
-              <Input
-                id="action-owner"
-                value={owner}
-                onChange={(event) => setOwner(event.target.value)}
-                placeholder="Ej: C. Morales"
-              />
+              <Select value={owner} onValueChange={setOwner}>
+                <SelectTrigger id="action-owner">
+                  <SelectValue placeholder="Asignar a…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEAM_MEMBERS.map((member) => (
+                    <SelectItem key={member} value={member}>
+                      {member}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
