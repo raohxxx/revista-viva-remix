@@ -96,7 +96,11 @@ export function computeEffectivenessByAction(actions: RetentionAction[]): Effect
   for (const action of actions) {
     const entry = map.get(action.action_type) ?? { interventions: 0, known: 0, retained: 0 };
     entry.interventions += 1;
-    if (action.outcome === "Retenido" || action.outcome === "Canceló" || action.outcome === "Sin respuesta") {
+    if (
+      action.outcome === "Retenido" ||
+      action.outcome === "Canceló" ||
+      action.outcome === "Sin respuesta"
+    ) {
       entry.known += 1;
       if (action.outcome === "Retenido") entry.retained += 1;
     }
@@ -133,7 +137,9 @@ export function computeFunnel(
     (i) => i.prediction.level === "high" || i.prediction.level === "critical",
   );
   const atRiskIds = new Set(atRisk.map((i) => i.subscriber.id));
-  const intervenedIds = new Set(actions.filter((a) => atRiskIds.has(a.subscriber_id)).map((a) => a.subscriber_id));
+  const intervenedIds = new Set(
+    actions.filter((a) => atRiskIds.has(a.subscriber_id)).map((a) => a.subscriber_id),
+  );
 
   const knownOutcome = actions.filter(
     (a) => a.outcome === "Retenido" || a.outcome === "Canceló" || a.outcome === "Sin respuesta",
@@ -167,7 +173,10 @@ export function computeFunnel(
 }
 
 /** Top prioridades del día: riesgo + renovación + ausencia de intervención. */
-export function computeTodayPriorities(items: SubscriberWithRisk[], limit = 5): SubscriberWithRisk[] {
+export function computeTodayPriorities(
+  items: SubscriberWithRisk[],
+  limit = 5,
+): SubscriberWithRisk[] {
   return [...items]
     .filter((i) => i.prediction.level === "high" || i.prediction.level === "critical")
     .sort((a, b) => b.priorityScore - a.priorityScore || b.prediction.score - a.prediction.score)

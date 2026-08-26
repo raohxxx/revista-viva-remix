@@ -35,11 +35,17 @@ export function MetricCard({
     <Card className="gap-0 p-4">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{label}</p>
+          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            {label}
+          </p>
           {tooltip && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <button type="button" aria-label={`Definición de ${label}`} className="text-muted-foreground">
+                <button
+                  type="button"
+                  aria-label={`Definición de ${label}`}
+                  className="text-muted-foreground"
+                >
                   <Info className="h-3.5 w-3.5" aria-hidden />
                 </button>
               </TooltipTrigger>

@@ -27,7 +27,10 @@ export function PageHeader({
   return (
     <header className="mb-6 space-y-3">
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav aria-label="Ruta de navegación" className="flex items-center gap-1 text-xs text-muted-foreground">
+        <nav
+          aria-label="Ruta de navegación"
+          className="flex items-center gap-1 text-xs text-muted-foreground"
+        >
           {breadcrumbs.map((crumb, index) => (
             <span key={crumb.label} className="flex items-center gap-1">
               {index > 0 && <ChevronRight className="h-3 w-3" aria-hidden />}

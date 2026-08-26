@@ -29,7 +29,9 @@ export function RiskScoreTooltip() {
 export function RiskScoreInline({ score, level }: { score: number; level: RiskLevel }) {
   return (
     <div className="flex items-center gap-2">
-      <span className={cn("tabular w-8 text-sm font-semibold", RISK_TEXT_COLOR[level])}>{score}</span>
+      <span className={cn("tabular w-8 text-sm font-semibold", RISK_TEXT_COLOR[level])}>
+        {score}
+      </span>
       <span className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
         <span
           className={cn("block h-full rounded-full", RISK_BAR_COLOR[level])}
@@ -45,12 +47,17 @@ export function RiskScoreGauge({ score, level }: { score: number; level: RiskLev
   return (
     <div className="space-y-3">
       <div className="flex items-baseline gap-2">
-        <span className={cn("tabular text-5xl font-semibold", RISK_TEXT_COLOR[level])}>{score}</span>
+        <span className={cn("tabular text-5xl font-semibold", RISK_TEXT_COLOR[level])}>
+          {score}
+        </span>
         <span className="text-lg text-muted-foreground">/ 100</span>
       </div>
       <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
         <span
-          className={cn("absolute inset-y-0 left-0 rounded-full transition-all", RISK_BAR_COLOR[level])}
+          className={cn(
+            "absolute inset-y-0 left-0 rounded-full transition-all",
+            RISK_BAR_COLOR[level],
+          )}
           style={{ width: `${score}%` }}
         />
       </div>

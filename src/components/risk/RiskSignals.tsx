@@ -10,8 +10,8 @@ export function RiskSignals({ prediction }: { prediction: RiskPrediction }) {
   if (active.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Ninguna regla activa aporta puntos para este suscriptor. Su comportamiento se mantiene dentro
-        de los rangos esperados.
+        Ninguna regla activa aporta puntos para este suscriptor. Su comportamiento se mantiene
+        dentro de los rangos esperados.
       </p>
     );
   }

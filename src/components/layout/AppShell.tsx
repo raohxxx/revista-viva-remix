@@ -82,7 +82,12 @@ function SidebarFooter() {
         </div>
       </div>
       <div className="flex gap-1">
-        <Button asChild variant="ghost" size="sm" className="flex-1 justify-start text-muted-foreground">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="flex-1 justify-start text-muted-foreground"
+        >
           <Link to="/configuracion">
             <Settings className="h-4 w-4" aria-hidden />
             Configuración
@@ -132,7 +137,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </SheetContent>
             </Sheet>
             <div className="leading-tight">
-              <p className="text-sm font-medium text-foreground">RevistaViva Retention Intelligence</p>
+              <p className="text-sm font-medium text-foreground">
+                RevistaViva Retention Intelligence
+              </p>
               <p className="hidden text-[11px] text-muted-foreground sm:block">
                 Detección temprana de riesgo de fuga
               </p>

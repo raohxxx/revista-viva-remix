@@ -56,7 +56,6 @@ function DataRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-
 function ClienteDetailPage() {
   const { id } = Route.useParams();
   const portfolio = usePortfolio();
@@ -89,15 +88,17 @@ function ClienteDetailPage() {
         const change = percentChange(subscriber.sessions_30d, subscriber.sessions_previous_30d);
         const renewalDays = daysUntil(subscriber.renewal_date);
         const inactivity = daysSince(subscriber.last_access_at);
+        const recommendation = buildRecommendation(subscriber, prediction);
+        const explanation = buildExplanation(subscriber, prediction);
 
         return (
           <>
             <PageHeader
-              title={subscriber.customer_code}
-              description={`${subscriber.plan} · ${formatCLP(subscriber.monthly_value)}/mes · cliente hace ${formatTenure(subscriber.subscription_start_date)}`}
+              title={subscriber.full_name ?? subscriber.customer_code}
+              description={`${subscriber.customer_code} · ${subscriber.email ?? "sin email"} · ${subscriber.plan} (${subscriber.billing_period}) · ${formatCLP(monthlyRevenue(subscriber))}/mes · cliente hace ${formatTenure(subscriber.subscription_start_date)}`}
               breadcrumbs={[
                 { label: "Clientes", to: "/clientes" },
-                { label: subscriber.customer_code },
+                { label: subscriber.full_name ?? subscriber.customer_code },
               ]}
               actions={
                 <div className="flex gap-2">
@@ -109,9 +110,9 @@ function ClienteDetailPage() {
                   </Button>
                   <InterventionDialog
                     subscriberId={subscriber.id}
-                    customerCode={subscriber.customer_code}
-                    suggestedType={suggestedType(prediction.recommendedAction)}
-                    suggestedNote={prediction.recommendedAction}
+                    customerCode={subscriber.full_name ?? subscriber.customer_code}
+                    suggestedType={recommendation.actionType}
+                    suggestedNote={recommendation.action}
                     trigger={
                       <Button size="sm">
                         <Plus className="h-4 w-4" aria-hidden />
@@ -134,14 +135,27 @@ function ClienteDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <RiskScoreGauge score={prediction.score} level={prediction.level} />
-                  <RiskBadge level={prediction.level} size="md" />
-                  <div className="rounded-lg bg-muted p-3">
-                    <p className="text-xs font-medium text-muted-foreground">Motivo principal</p>
-                    <p className="mt-1 text-sm text-foreground">{prediction.principalReason}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <RiskBadge level={prediction.level} size="md" />
+                    <PriorityBadge score={item.priorityScore} />
                   </div>
-                  <div className="rounded-lg border border-border p-3">
-                    <p className="text-xs font-medium text-muted-foreground">Acción recomendada</p>
-                    <p className="mt-1 text-sm text-foreground">{prediction.recommendedAction}</p>
+                  <div className="space-y-2 rounded-lg bg-muted p-3">
+                    <p className="text-xs font-medium text-muted-foreground">Señal dominante</p>
+                    <DominantSignalBadge
+                      signalKey={prediction.principalSignalKey}
+                      size="md"
+                      className="bg-card"
+                    />
+                    <p className="text-sm text-foreground">{explanation}</p>
+                  </div>
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Acción recomendada · {recommendation.urgency}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-foreground">
+                      {recommendation.action}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{recommendation.reason}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -224,10 +238,7 @@ function ClienteDetailPage() {
                     label="Pagos fallidos (90d)"
                     value={formatNumber(subscriber.payment_failures_90d)}
                   />
-                  <DataRow
-                    label="Reclamos (90d)"
-                    value={formatNumber(subscriber.complaints_90d)}
-                  />
+                  <DataRow label="Reclamos (90d)" value={formatNumber(subscriber.complaints_90d)} />
                   <DataRow
                     label="Satisfacción (NPS/CSAT)"
                     value={

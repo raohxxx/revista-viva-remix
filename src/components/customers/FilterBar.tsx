@@ -115,7 +115,10 @@ export function FilterBar({
           </SelectContent>
         </Select>
 
-        <Select value={filters.plan} onValueChange={(value) => onChange({ ...filters, plan: value })}>
+        <Select
+          value={filters.plan}
+          onValueChange={(value) => onChange({ ...filters, plan: value })}
+        >
           <SelectTrigger className="w-[160px]" aria-label="Filtrar por plan">
             <SelectValue />
           </SelectTrigger>
@@ -171,7 +174,8 @@ export function FilterBar({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Mostrando <span className="text-foreground">{resultCount}</span> de {totalCount} suscriptores
+        Mostrando <span className="text-foreground">{resultCount}</span> de {totalCount}{" "}
+        suscriptores
       </p>
     </div>
   );

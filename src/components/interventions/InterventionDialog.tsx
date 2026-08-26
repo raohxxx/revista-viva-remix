@@ -27,6 +27,7 @@ import {
   ACTION_OUTCOMES,
   ACTION_STATUSES,
   ACTION_TYPES,
+  TEAM_MEMBERS,
   type ActionOutcome,
   type ActionStatus,
   type ActionType,
@@ -65,8 +66,12 @@ export function InterventionDialog({
   const [owner, setOwner] = useState(action?.owner ?? "");
   const [date, setDate] = useState(toDateInput(action?.scheduled_at));
   const [notes, setNotes] = useState(action?.notes ?? suggestedNote ?? "");
-  const [status, setStatus] = useState<ActionStatus>((action?.status as ActionStatus) ?? "Pendiente");
-  const [outcome, setOutcome] = useState<ActionOutcome | "">((action?.outcome as ActionOutcome) ?? "");
+  const [status, setStatus] = useState<ActionStatus>(
+    (action?.status as ActionStatus) ?? "Pendiente",
+  );
+  const [outcome, setOutcome] = useState<ActionOutcome | "">(
+    (action?.outcome as ActionOutcome) ?? "",
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -123,8 +128,8 @@ export function InterventionDialog({
         <DialogHeader>
           <DialogTitle>{action ? "Actualizar intervención" : "Crear intervención"}</DialogTitle>
           <DialogDescription>
-            Cliente {customerCode}. Las intervenciones quedan registradas y alimentan las métricas de
-            efectividad.
+            Cliente {customerCode}. Las intervenciones quedan registradas y alimentan las métricas
+            de efectividad.
           </DialogDescription>
         </DialogHeader>
 
@@ -132,7 +137,10 @@ export function InterventionDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="action-type">Tipo de acción</Label>
-              <Select value={actionType} onValueChange={(value) => setActionType(value as ActionType)}>
+              <Select
+                value={actionType}
+                onValueChange={(value) => setActionType(value as ActionType)}
+              >
                 <SelectTrigger id="action-type">
                   <SelectValue />
                 </SelectTrigger>
@@ -148,12 +156,18 @@ export function InterventionDialog({
 
             <div className="space-y-1.5">
               <Label htmlFor="action-owner">Responsable</Label>
-              <Input
-                id="action-owner"
-                value={owner}
-                onChange={(event) => setOwner(event.target.value)}
-                placeholder="Ej: C. Morales"
-              />
+              <Select value={owner} onValueChange={setOwner}>
+                <SelectTrigger id="action-owner">
+                  <SelectValue placeholder="Asignar a…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEAM_MEMBERS.map((member) => (
+                    <SelectItem key={member} value={member}>
+                      {member}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
