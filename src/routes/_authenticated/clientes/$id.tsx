@@ -178,7 +178,12 @@ function ClienteDetailPage() {
                 </CardHeader>
                 <CardContent>
                   <DataRow label="Plan" value={subscriber.plan} />
-                  <DataRow label="Valor mensual" value={formatCLP(subscriber.monthly_value)} />
+                  <DataRow label="Facturación" value={subscriber.billing_period} />
+                  <DataRow label="MRR" value={`${formatCLP(monthlyRevenue(subscriber))}/mes`} />
+                  <DataRow
+                    label="Valor facturado"
+                    value={`${formatCLP(subscriber.monthly_value)} / ${subscriber.billing_period === "anual" ? "año" : "mes"}`}
+                  />
                   <DataRow label="Estado" value={subscriber.subscription_status} />
                   <DataRow label="Inicio" value={formatDate(subscriber.subscription_start_date)} />
                   <DataRow
