@@ -96,7 +96,9 @@ function AuthPage() {
           <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <ShieldCheck className="h-5 w-5" aria-hidden />
           </span>
-          <h1 className="text-xl font-semibold text-foreground">RevistaViva Retention Intelligence</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            RevistaViva Retention Intelligence
+          </h1>
           <p className="text-sm text-muted-foreground">Detección temprana de riesgo de fuga</p>
         </div>
 

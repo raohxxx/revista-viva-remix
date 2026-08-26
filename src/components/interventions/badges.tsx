@@ -28,9 +28,19 @@ function Pill({ label, className }: { label: string; className: string }) {
 }
 
 export function StatusBadge({ status }: { status: string }) {
-  return <Pill label={status} className={STATUS_STYLES[status] ?? "bg-muted text-muted-foreground border-border"} />;
+  return (
+    <Pill
+      label={status}
+      className={STATUS_STYLES[status] ?? "bg-muted text-muted-foreground border-border"}
+    />
+  );
 }
 
 export function OutcomeBadge({ outcome }: { outcome: string }) {
-  return <Pill label={outcome} className={OUTCOME_STYLES[outcome] ?? "bg-muted text-muted-foreground border-border"} />;
+  return (
+    <Pill
+      label={outcome}
+      className={OUTCOME_STYLES[outcome] ?? "bg-muted text-muted-foreground border-border"}
+    />
+  );
 }

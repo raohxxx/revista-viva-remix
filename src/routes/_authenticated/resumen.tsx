@@ -75,12 +75,7 @@ function ResumenPage() {
         error={portfolio.error}
         onRetry={() => void portfolio.refetch()}
       >
-        {portfolio.data && (
-          <ResumenContent
-            data={portfolio.data}
-            history={history.data ?? []}
-          />
-        )}
+        {portfolio.data && <ResumenContent data={portfolio.data} history={history.data ?? []} />}
       </QueryState>
     </>
   );
@@ -234,7 +229,10 @@ function ResumenContent({
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={overview.distribution} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+              <BarChart
+                data={overview.distribution}
+                margin={{ top: 8, right: 8, bottom: 0, left: -20 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
                 <YAxis tickLine={false} axisLine={false} fontSize={12} />

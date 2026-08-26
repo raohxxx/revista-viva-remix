@@ -30,7 +30,10 @@ export function InterventionTimeline({
     <ol className="space-y-4">
       {actions.map((action) => (
         <li key={action.id} className="relative border-l border-border pl-5">
-          <span className="absolute top-1.5 -left-[5px] h-2.5 w-2.5 rounded-full bg-primary" aria-hidden />
+          <span
+            className="absolute top-1.5 -left-[5px] h-2.5 w-2.5 rounded-full bg-primary"
+            aria-hidden
+          />
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground">
               {formatDate(action.completed_at ?? action.scheduled_at ?? action.created_at)}

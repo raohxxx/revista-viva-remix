@@ -68,10 +68,7 @@ function AnalisisPage() {
         onRetry={() => void portfolio.refetch()}
       >
         {portfolio.data && (
-          <AnalisisContent
-            items={portfolio.data.items}
-            actions={portfolio.data.actions}
-          />
+          <AnalisisContent items={portfolio.data.items} actions={portfolio.data.actions} />
         )}
       </QueryState>
     </>
@@ -172,7 +169,10 @@ function AnalisisContent({
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={overview.distribution} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+              <BarChart
+                data={overview.distribution}
+                margin={{ top: 8, right: 8, bottom: 0, left: -16 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
                 <YAxis tickLine={false} axisLine={false} fontSize={12} />
@@ -259,9 +259,10 @@ function AnalisisContent({
       </section>
 
       <p className="text-xs text-muted-foreground">
-        Nota metodológica: el Risk Score es una heurística explicable basada en reglas configurables.
-        No es un modelo predictivo entrenado con datos históricos de cancelación, por lo que las
-        métricas de efectividad describen lo observado por el equipo y no relaciones causales.
+        Nota metodológica: el Risk Score es una heurística explicable basada en reglas
+        configurables. No es un modelo predictivo entrenado con datos históricos de cancelación, por
+        lo que las métricas de efectividad describen lo observado por el equipo y no relaciones
+        causales.
       </p>
     </div>
   );

@@ -35,7 +35,10 @@ function num(config: Record<string, number>, key: string, fallback: number): num
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-type SignalEvaluator = (subscriber: Subscriber, rule: RiskRule) => Omit<RiskSignal, "key" | "label" | "maxPoints"> | null;
+type SignalEvaluator = (
+  subscriber: Subscriber,
+  rule: RiskRule,
+) => Omit<RiskSignal, "key" | "label" | "maxPoints"> | null;
 
 const evaluators: Record<SignalKey, SignalEvaluator> = {
   activity_drop: (s, rule) => {
@@ -92,7 +95,8 @@ const evaluators: Record<SignalKey, SignalEvaluator> = {
     const threshold = num(rule.configuration, "threshold_days", 30);
     const critical = num(rule.configuration, "critical_days", 7);
     if (days > threshold) return { detail: `Renueva en ${days} días`, points: 0 };
-    if (days < 0) return { detail: `Renovación vencida hace ${Math.abs(days)} días`, points: rule.weight };
+    if (days < 0)
+      return { detail: `Renovación vencida hace ${Math.abs(days)} días`, points: rule.weight };
     return {
       detail: `Renueva en ${days} día(s)`,
       points: rule.weight * ramp(days, threshold, critical),
@@ -122,7 +126,6 @@ const evaluators: Record<SignalKey, SignalEvaluator> = {
   },
 };
 
-
 const PRINCIPAL_REASONS: Record<SignalKey, string> = {
   activity_drop: "Reducción significativa de actividad",
   inactivity: "Inactividad prolongada en la plataforma",
@@ -132,7 +135,10 @@ const PRINCIPAL_REASONS: Record<SignalKey, string> = {
   complaints: "Reclamos recientes sin resolución",
 };
 
-export function classifyRisk(score: number, thresholds: RiskThresholds = DEFAULT_THRESHOLDS): RiskLevel {
+export function classifyRisk(
+  score: number,
+  thresholds: RiskThresholds = DEFAULT_THRESHOLDS,
+): RiskLevel {
   if (score >= thresholds.critical) return "critical";
   if (score >= thresholds.high) return "high";
   if (score >= thresholds.medium) return "medium";

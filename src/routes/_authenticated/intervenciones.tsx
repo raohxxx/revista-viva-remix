@@ -160,7 +160,9 @@ function IntervencionesPage() {
                     return (
                       <TableRow key={action.id}>
                         <TableCell className="whitespace-nowrap text-muted-foreground">
-                          {formatDate(action.completed_at ?? action.scheduled_at ?? action.created_at)}
+                          {formatDate(
+                            action.completed_at ?? action.scheduled_at ?? action.created_at,
+                          )}
                         </TableCell>
                         <TableCell className="font-medium whitespace-nowrap">
                           {item ? (

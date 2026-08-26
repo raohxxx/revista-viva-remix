@@ -56,7 +56,6 @@ function DataRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-
 function ClienteDetailPage() {
   const { id } = Route.useParams();
   const portfolio = usePortfolio();
@@ -161,7 +160,6 @@ function ClienteDetailPage() {
                 </CardContent>
               </Card>
 
-
               <Card className="lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="text-base">Por qué está en riesgo</CardTitle>
@@ -240,10 +238,7 @@ function ClienteDetailPage() {
                     label="Pagos fallidos (90d)"
                     value={formatNumber(subscriber.payment_failures_90d)}
                   />
-                  <DataRow
-                    label="Reclamos (90d)"
-                    value={formatNumber(subscriber.complaints_90d)}
-                  />
+                  <DataRow label="Reclamos (90d)" value={formatNumber(subscriber.complaints_90d)} />
                   <DataRow
                     label="Satisfacción (NPS/CSAT)"
                     value={

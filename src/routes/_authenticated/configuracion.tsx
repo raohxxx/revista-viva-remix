@@ -53,24 +53,13 @@ function ConfiguracionPage() {
         error={rules.error}
         onRetry={() => void rules.refetch()}
       >
-        {rules.data && (
-          <ConfigForm
-            rules={rules.data.rules}
-            thresholds={rules.data.thresholds}
-          />
-        )}
+        {rules.data && <ConfigForm rules={rules.data.rules} thresholds={rules.data.thresholds} />}
       </QueryState>
     </>
   );
 }
 
-function ConfigForm({
-  rules,
-  thresholds,
-}: {
-  rules: RiskRule[];
-  thresholds: RiskThresholds;
-}) {
+function ConfigForm({ rules, thresholds }: { rules: RiskRule[]; thresholds: RiskThresholds }) {
   const queryClient = useQueryClient();
   const [localRules, setLocalRules] = useState(rules);
   const [localThresholds, setLocalThresholds] = useState(thresholds);
@@ -132,8 +121,8 @@ function ConfigForm({
         <CardHeader>
           <CardTitle className="text-base">Reglas de riesgo</CardTitle>
           <CardDescription>
-            Cada regla aporta como máximo su peso en puntos al Risk Score (0–100). Peso total activo:{" "}
-            <span className="tabular text-foreground">{totalWeight}</span> pts.
+            Cada regla aporta como máximo su peso en puntos al Risk Score (0–100). Peso total
+            activo: <span className="tabular text-foreground">{totalWeight}</span> pts.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -217,8 +206,9 @@ function ConfigForm({
         <CardHeader>
           <CardTitle className="text-base">Motor de predicción</CardTitle>
           <CardDescription>
-            Proveedor activo: <span className="text-foreground">{getChurnPredictionProviderName()}</span>.
-            La arquitectura permite reemplazarlo por un modelo de machine learning sin cambiar la
+            Proveedor activo:{" "}
+            <span className="text-foreground">{getChurnPredictionProviderName()}</span>. La
+            arquitectura permite reemplazarlo por un modelo de machine learning sin cambiar la
             interfaz.
           </CardDescription>
         </CardHeader>

@@ -11,7 +11,10 @@ export interface RulesConfig {
 }
 
 export async function fetchRulesConfig(): Promise<RulesConfig> {
-  const { data, error } = await supabase.from("risk_rules").select("*").order("weight", { ascending: false });
+  const { data, error } = await supabase
+    .from("risk_rules")
+    .select("*")
+    .order("weight", { ascending: false });
   if (error) throw new Error(`No fue posible cargar las reglas del modelo: ${error.message}`);
 
   const rows = data ?? [];
@@ -44,7 +47,8 @@ export async function saveThresholds(thresholds: RiskThresholds): Promise<void> 
     {
       rule_key: THRESHOLDS_RULE_KEY,
       name: "Umbrales de clasificación",
-      description: "Umbrales de corte para clasificar el Risk Score en Bajo, Medio, Alto y Crítico.",
+      description:
+        "Umbrales de corte para clasificar el Risk Score en Bajo, Medio, Alto y Crítico.",
       enabled: true,
       weight: 0,
       configuration: thresholds as unknown as Record<string, number>,
