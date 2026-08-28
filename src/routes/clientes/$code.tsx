@@ -75,10 +75,7 @@ function ClienteDetalle() {
       <PageHeader
         title={subscriber.customer_code}
         description={`${subscriber.plan} · ${formatCLP(subscriber.monthly_value)} mensual`}
-        breadcrumbs={[
-          { label: "Clientes", to: "/clientes" },
-          { label: subscriber.customer_code },
-        ]}
+        breadcrumbs={[{ label: "Clientes", to: "/clientes" }, { label: subscriber.customer_code }]}
         actions={
           <Button asChild variant="outline" size="sm">
             <Link to="/clientes">

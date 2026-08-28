@@ -12,7 +12,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { SUBSCRIBERS } from "@/data/subscribers";
-import { ACTION_TYPES, TEAM_MEMBERS, useInterventions, type ActionType } from "@/state/interventions";
+import {
+  ACTION_TYPES,
+  TEAM_MEMBERS,
+  useInterventions,
+  type ActionType,
+} from "@/state/interventions";
 
 export function InterventionForm({ fixedCustomer }: { fixedCustomer?: string }) {
   const { addIntervention } = useInterventions();
@@ -28,7 +33,12 @@ export function InterventionForm({ fixedCustomer }: { fixedCustomer?: string }) 
       className="space-y-4"
       onSubmit={(event) => {
         event.preventDefault();
-        addIntervention({ customer_code: code, action_type: actionType, owner, notes: notes.trim() });
+        addIntervention({
+          customer_code: code,
+          action_type: actionType,
+          owner,
+          notes: notes.trim(),
+        });
         setNotes("");
         toast.success(`Intervención registrada para ${code}`);
       }}
