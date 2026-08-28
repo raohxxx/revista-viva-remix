@@ -2,8 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { DemoBadge } from "@/components/common/DemoBadge";
-
 interface Crumb {
   label: string;
   to?: string;
@@ -14,7 +12,6 @@ interface PageHeaderProps {
   description?: string;
   breadcrumbs?: Crumb[];
   actions?: ReactNode;
-  showDemoBadge?: boolean;
 }
 
 export function PageHeader({
@@ -22,7 +19,6 @@ export function PageHeader({
   description,
   breadcrumbs,
   actions,
-  showDemoBadge = true,
 }: PageHeaderProps) {
   return (
     <header className="mb-6 space-y-3">
@@ -47,10 +43,7 @@ export function PageHeader({
       )}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
-            {showDemoBadge && <DemoBadge />}
-          </div>
+          <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
           {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
