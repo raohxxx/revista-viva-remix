@@ -8,12 +8,12 @@ export function DemoBadge() {
       <TooltipTrigger asChild>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
           <FlaskConical className="h-3 w-3" aria-hidden />
-          Datos de demostración
+          Datos demo
         </span>
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">
-        Datos sintéticos cargados en memoria para demostrar el producto. No corresponden a
-        suscriptores reales de RevistaViva.
+        Datos sintéticos generados para demostrar el funcionamiento del sistema. No corresponden a
+        información real de RevistaViva.
       </TooltipContent>
     </Tooltip>
   );
