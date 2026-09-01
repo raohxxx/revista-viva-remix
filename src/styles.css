@@ -42,6 +42,12 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-teal: var(--brand-teal);
+  --color-brand-magenta: var(--brand-magenta);
+  --color-brand-coral: var(--brand-coral);
+
   --color-risk-low: var(--risk-low);
   --color-risk-low-soft: var(--risk-low-soft);
   --color-risk-medium: var(--risk-medium);
@@ -68,48 +74,55 @@
 }
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 
-  --background: oklch(0.985 0.002 250);
-  --foreground: oklch(0.21 0.02 258);
-  --surface: oklch(1 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.02 258);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.02 258);
+  /* Marca VIDA */
+  --brand-navy: #0f2243;
+  --brand-blue: #1d73b7;
+  --brand-teal: #20b7a6;
+  --brand-magenta: #d91b72;
+  --brand-coral: #ff5a54;
 
-  --primary: oklch(0.48 0.13 250);
-  --primary-foreground: oklch(0.99 0.002 250);
-  --secondary: oklch(0.96 0.005 255);
-  --secondary-foreground: oklch(0.3 0.02 258);
-  --muted: oklch(0.965 0.005 255);
-  --muted-foreground: oklch(0.53 0.015 258);
-  --accent: oklch(0.955 0.012 250);
-  --accent-foreground: oklch(0.35 0.05 250);
-  --destructive: oklch(0.55 0.2 25);
-  --destructive-foreground: oklch(0.99 0.002 250);
+  --background: #f6f8fb;
+  --foreground: #172033;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #172033;
+  --popover: #ffffff;
+  --popover-foreground: #172033;
 
-  --border: oklch(0.915 0.006 255);
-  --input: oklch(0.9 0.008 255);
-  --ring: oklch(0.48 0.13 250);
+  --primary: #0f2243;
+  --primary-foreground: #ffffff;
+  --secondary: #eef2f7;
+  --secondary-foreground: #172033;
+  --muted: #f1f4f9;
+  --muted-foreground: #667085;
+  --accent: #e6f7f4;
+  --accent-foreground: #0f2243;
+  --destructive: #dc3545;
+  --destructive-foreground: #ffffff;
 
-  --risk-low: oklch(0.58 0.13 156);
-  --risk-low-soft: oklch(0.95 0.04 156);
-  --risk-medium: oklch(0.72 0.14 85);
-  --risk-medium-soft: oklch(0.96 0.05 90);
-  --risk-high: oklch(0.66 0.16 48);
-  --risk-high-soft: oklch(0.96 0.05 55);
-  --risk-critical: oklch(0.56 0.2 25);
-  --risk-critical-soft: oklch(0.95 0.04 25);
+  --border: #e4e9f0;
+  --input: #dfe5ee;
+  --ring: #20b7a6;
 
-  --sidebar: oklch(0.99 0.002 250);
-  --sidebar-foreground: oklch(0.32 0.015 258);
-  --sidebar-primary: oklch(0.48 0.13 250);
-  --sidebar-primary-foreground: oklch(0.99 0.002 250);
-  --sidebar-accent: oklch(0.955 0.008 250);
-  --sidebar-accent-foreground: oklch(0.28 0.03 250);
-  --sidebar-border: oklch(0.92 0.006 255);
-  --sidebar-ring: oklch(0.48 0.13 250);
+  --risk-low: #159a72;
+  --risk-low-soft: #e6f6f0;
+  --risk-medium: #f59e0b;
+  --risk-medium-soft: #fdf3e1;
+  --risk-high: #ea6a1f;
+  --risk-high-soft: #fdeee3;
+  --risk-critical: #dc3545;
+  --risk-critical-soft: #fdeaec;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #172033;
+  --sidebar-primary: #0f2243;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef2f7;
+  --sidebar-accent-foreground: #0f2243;
+  --sidebar-border: #e4e9f0;
+  --sidebar-ring: #20b7a6;
 }
 
 .dark {
@@ -160,6 +173,12 @@
     border-color: var(--color-border);
   }
 
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -177,4 +196,27 @@
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+@layer base {
+  .tabular,
+  .metric-value,
+  table,
+  time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
