@@ -83,8 +83,7 @@ function Header() {
         {showPeriod && (
           <Select value={period} onValueChange={(value) => setPeriod(value as typeof period)}>
             <SelectTrigger
-              size="sm"
-              className="hidden w-[150px] md:flex"
+              className="hidden h-8 w-[150px] md:flex"
               aria-label="Periodo de análisis"
             >
               <SelectValue />
