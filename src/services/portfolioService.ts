@@ -91,7 +91,6 @@ export async function fetchPortfolio(): Promise<Portfolio> {
     };
   });
 
-
   return { items, actions, byId: new Map(items.map((item) => [item.subscriber.id, item])) };
 }
 

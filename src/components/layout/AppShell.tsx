@@ -57,7 +57,12 @@ function Header() {
           open={navOpen}
           onOpenChange={setNavOpen}
           trigger={
-            <Button variant="ghost" size="icon" className="min-h-10 min-w-10" aria-label="Abrir navegación">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="min-h-10 min-w-10"
+              aria-label="Abrir navegación"
+            >
               <Menu className="h-5 w-5" aria-hidden />
             </Button>
           }
@@ -83,8 +88,7 @@ function Header() {
         {showPeriod && (
           <Select value={period} onValueChange={(value) => setPeriod(value as typeof period)}>
             <SelectTrigger
-              size="sm"
-              className="hidden w-[150px] md:flex"
+              className="hidden h-8 w-[150px] md:flex"
               aria-label="Periodo de análisis"
             >
               <SelectValue />
