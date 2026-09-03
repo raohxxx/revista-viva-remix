@@ -57,7 +57,12 @@ function Header() {
           open={navOpen}
           onOpenChange={setNavOpen}
           trigger={
-            <Button variant="ghost" size="icon" className="min-h-10 min-w-10" aria-label="Abrir navegación">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="min-h-10 min-w-10"
+              aria-label="Abrir navegación"
+            >
               <Menu className="h-5 w-5" aria-hidden />
             </Button>
           }
