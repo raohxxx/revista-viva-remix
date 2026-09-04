@@ -16,6 +16,7 @@ export default tseslint.config(
       "src/integrations/supabase/previewAuthStorage.ts",
       "src/integrations/supabase/auth-middleware.ts",
       "src/integrations/supabase/auth-attacher.ts",
+      "src/integrations/supabase/cron-auth.ts",
       "src/integrations/supabase/types.ts",
     ],
   },
