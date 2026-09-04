@@ -88,7 +88,7 @@ function ClienteDetailPage() {
         const change = percentChange(subscriber.sessions_30d, subscriber.sessions_previous_30d);
         const renewalDays = daysUntil(subscriber.renewal_date);
         const inactivity = daysSince(subscriber.last_access_at);
-        const recommendation = buildRecommendation(subscriber, prediction);
+        const recommendation = buildRecommendation(subscriber, prediction, portfolio.data?.rules);
         const explanation = buildExplanation(subscriber, prediction);
 
         return (
