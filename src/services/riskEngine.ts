@@ -1,4 +1,4 @@
-import { daysSince, daysUntil, monthlyRevenue, percentChange } from "@/lib/format";
+import { daysSince, daysUntil, formatDate, monthlyRevenue, percentChange } from "@/lib/format";
 import {
   DEFAULT_THRESHOLDS,
   SIGNAL_LABEL,
@@ -189,7 +189,7 @@ export function calculateRiskScore(
     recommendedAction: "",
   };
 
-  return { ...base, recommendedAction: buildRecommendation(subscriber, base).action };
+  return { ...base, recommendedAction: buildRecommendation(subscriber, base, rules).action };
 }
 
 /** Devuelve la regla vigente (habilitada) para una señal, si existe. */
@@ -232,7 +232,7 @@ export function calculatePriorityScore(
   // en el umbral crítico de la misma regla.
   const start = window.threshold * 2;
   const renewalUrgency =
-    days == null ? 0 : ramp(days, start, window.critical) * (days < 0 ? 20 : 20);
+    days == null ? 0 : ramp(days, start, window.critical) * 20;
 
   const customerValueFactor = clamp(monthlyRevenue(subscriber) / 15000, 0, 1) * 15;
 
