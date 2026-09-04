@@ -192,24 +192,52 @@ export function calculateRiskScore(
   return { ...base, recommendedAction: buildRecommendation(subscriber, base).action };
 }
 
+/** Devuelve la regla vigente (habilitada) para una señal, si existe. */
+export function activeRule(rules: RiskRule[] | undefined, key: SignalKey): RiskRule | null {
+  const rule = rules?.find((r) => r.ruleKey === key);
+  return rule && rule.enabled ? rule : null;
+}
+
+/** Ventana de renovación tomada de la regla vigente (con valores por defecto). */
+function renewalWindow(rules?: RiskRule[]): {
+  enabled: boolean;
+  threshold: number;
+  critical: number;
+} {
+  const rule = activeRule(rules, "renewal_proximity");
+  return {
+    enabled: Boolean(rule),
+    threshold: rule ? num(rule.configuration, "threshold_days", 30) : 30,
+    critical: rule ? num(rule.configuration, "critical_days", 7) : 7,
+  };
+}
+
 /**
  * Prioridad operacional (distinta del Risk Score): combina riesgo,
  * cercanía de renovación, valor económico y señales críticas.
- * Fórmula transparente, normalizada de 0 a 100.
+ * Fórmula transparente, normalizada de 0 a 100. Cuando se entregan las reglas
+ * vigentes, la urgencia de renovación usa exactamente su ventana configurada.
  */
 export function calculatePriorityScore(
   subscriber: Subscriber,
   prediction: RiskPrediction,
   hasRecentIntervention: boolean,
+  rules?: RiskRule[],
 ): number {
   const riskFactor = prediction.score * 0.55;
 
   const days = daysUntil(subscriber.renewal_date);
-  const renewalUrgency = days == null ? 0 : clamp((60 - days) / 60, 0, 1) * 20;
+  const window = renewalWindow(rules);
+  // La urgencia empieza al doble de la ventana configurada y llega al máximo
+  // en el umbral crítico de la misma regla.
+  const start = window.threshold * 2;
+  const renewalUrgency =
+    days == null ? 0 : ramp(days, start, window.critical) * (days < 0 ? 20 : 20);
 
   const customerValueFactor = clamp(monthlyRevenue(subscriber) / 15000, 0, 1) * 15;
 
-  const paymentIssue = (subscriber.payment_failures_90d ?? 0) > 0 ? 8 : 0;
+  const paymentRuleActive = !rules || Boolean(activeRule(rules, "payment_failures"));
+  const paymentIssue = paymentRuleActive && (subscriber.payment_failures_90d ?? 0) > 0 ? 8 : 0;
   const criticalLevel = prediction.level === "critical" ? 4 : 0;
   const untouched = hasRecentIntervention ? 0 : 3;
   const criticalSignalBonus = paymentIssue + criticalLevel + untouched;
@@ -234,49 +262,73 @@ export function dominantSignal(prediction: RiskPrediction): SignalKey | null {
   return contributing[0]?.key ?? null;
 }
 
-/** Explicación en lenguaje sencillo construida desde las señales activas. */
-export function buildExplanation(subscriber: Subscriber, prediction: RiskPrediction): string {
-  const active = prediction.signals.filter((s) => s.points > 0).map((s) => s.key);
-  if (active.length === 0) {
-    return "Este cliente no presenta señales relevantes de riesgo: su actividad, pagos y satisfacción se mantienen dentro de los rangos esperados.";
-  }
+/** Frase por señal, construida con el detalle real evaluado por la regla. */
+const SIGNAL_PHRASE: Record<SignalKey, (detail: string) => string> = {
+  activity_drop: (d) => `una caída relevante de su actividad (${d.toLowerCase()})`,
+  inactivity: (d) => `inactividad en la plataforma (${d.toLowerCase()})`,
+  payment_failures: (d) => `problemas en el cobro de su suscripción (${d.toLowerCase()})`,
+  low_satisfaction: (d) => `baja satisfacción declarada (${d.toLowerCase()})`,
+  complaints: (d) => `reclamos recientes en soporte (${d.toLowerCase()})`,
+  renewal_proximity: (d) => `una renovación próxima (${d.toLowerCase()})`,
+};
 
-  const phrases: string[] = [];
-  if (active.includes("activity_drop")) phrases.push("una caída relevante de su actividad");
-  if (active.includes("inactivity")) phrases.push("varios días sin ingresar a la plataforma");
-  if (active.includes("payment_failures")) phrases.push("problemas en el cobro de su suscripción");
-  if (active.includes("low_satisfaction")) phrases.push("una satisfacción declarada baja");
-  if (active.includes("complaints")) phrases.push("reclamos recientes en soporte");
+/**
+ * Explicación en lenguaje sencillo construida solo desde las señales
+ * efectivamente activas según las reglas vigentes, indicando su aporte en
+ * puntos y la fecha exacta de renovación del suscriptor.
+ */
+export function buildExplanation(subscriber: Subscriber, prediction: RiskPrediction): string {
+  const active = prediction.signals
+    .filter((s) => s.points > 0)
+    .sort((a, b) => b.points - a.points);
 
   const days = daysUntil(subscriber.renewal_date);
+  const renewalDate = formatDate(subscriber.renewal_date);
   const renewalPhrase =
-    active.includes("renewal_proximity") && days != null
-      ? days < 0
-        ? " Su renovación ya venció, por lo que la gestión es inmediata."
-        : ` Su renovación ocurre en ${days} día(s), por lo que conviene intervenir antes de esa fecha.`
-      : "";
+    days == null
+      ? ""
+      : days < 0
+        ? ` Su renovación venció el ${renewalDate} (hace ${Math.abs(days)} día(s)), por lo que la gestión es inmediata.`
+        : days === 0
+          ? ` Su renovación es hoy (${renewalDate}).`
+          : ` Su renovación es el ${renewalDate}, en ${days} día(s).`;
 
+  if (active.length === 0) {
+    return `Con las reglas activas hoy, este cliente no acumula puntos de riesgo: su actividad, pagos y satisfacción están dentro de los rangos configurados.${renewalPhrase}`;
+  }
+
+  const parts = active
+    .filter((s) => s.key !== "renewal_proximity")
+    .map((s) => `${SIGNAL_PHRASE[s.key](s.detail)}: +${s.points} pts`);
+
+  const renewalSignal = active.find((s) => s.key === "renewal_proximity");
   const list =
-    phrases.length === 0
-      ? "una renovación muy próxima"
-      : phrases.length === 1
-        ? phrases[0]
-        : `${phrases.slice(0, -1).join(", ")} y ${phrases[phrases.length - 1]}`;
+    parts.length === 0
+      ? `proximidad de renovación: +${renewalSignal?.points ?? 0} pts`
+      : parts.length === 1
+        ? parts[0]
+        : `${parts.slice(0, -1).join("; ")}; y ${parts[parts.length - 1]}`;
 
-  return `Este cliente presenta ${list}.${renewalPhrase}`;
+  const renewalPoints =
+    renewalSignal && parts.length > 0 ? ` Suma además +${renewalSignal.points} pts por renovación próxima.` : "";
+
+  return `Este cliente presenta ${list}. En total acumula ${prediction.score} de 100 puntos de riesgo (nivel ${prediction.level === "critical" ? "crítico" : prediction.level === "high" ? "alto" : prediction.level === "medium" ? "medio" : "bajo"}).${renewalPoints}${renewalPhrase}`;
 }
 
 /**
  * Motor de recomendaciones por reglas: la acción depende de la combinación
- * real de señales activas, no de textos genéricos.
+ * real de señales activas y de la ventana de renovación configurada.
  */
 export function buildRecommendation(
   subscriber: Subscriber,
   prediction: RiskPrediction,
+  rules?: RiskRule[],
 ): Recommendation {
   const active = new Set(prediction.signals.filter((s) => s.points > 0).map((s) => s.key));
   const days = daysUntil(subscriber.renewal_date);
-  const renewalSoon = days != null && days <= 15;
+  const window = renewalWindow(rules);
+  const renewalSoon = days != null && days <= Math.max(window.critical, 15);
+  const renewalDate = formatDate(subscriber.renewal_date);
   const criticalCount = [
     active.has("payment_failures"),
     active.has("low_satisfaction"),
@@ -287,7 +339,7 @@ export function buildRecommendation(
   if (criticalCount >= 3) {
     return {
       action: "Priorizar llamada personalizada del equipo de Retención.",
-      reason: "Concentra varias señales críticas al mismo tiempo.",
+      reason: `Concentra ${criticalCount} señales críticas activas al mismo tiempo.`,
       urgency: "Inmediata",
       actionType: "Llamada",
     };
@@ -296,7 +348,7 @@ export function buildRecommendation(
   if (active.has("payment_failures")) {
     return {
       action: "Contactar al cliente para actualizar el medio de pago antes de la renovación.",
-      reason: `Registra ${subscriber.payment_failures_90d} intento(s) de cobro rechazado(s) en los últimos 90 días.`,
+      reason: `Registra ${subscriber.payment_failures_90d} intento(s) de cobro rechazado(s) en los últimos 90 días y renueva el ${renewalDate}.`,
       urgency: renewalSoon ? "Inmediata" : "Esta semana",
       actionType: "Soporte de pago",
     };
@@ -306,7 +358,7 @@ export function buildRecommendation(
     return {
       action: "Realizar seguimiento después de la resolución del reclamo.",
       reason: `Tiene ${subscriber.complaints_90d} reclamo(s) registrado(s) en los últimos 90 días.`,
-      urgency: "Esta semana",
+      urgency: renewalSoon ? "Inmediata" : "Esta semana",
       actionType: "Seguimiento",
     };
   }
@@ -323,7 +375,7 @@ export function buildRecommendation(
   if (renewalSoon && (active.has("activity_drop") || active.has("inactivity"))) {
     return {
       action: "Contactar antes de la renovación y evaluar un incentivo de retención.",
-      reason: "Baja actividad con la renovación muy próxima.",
+      reason: `Baja actividad con la renovación del ${renewalDate}${days != null ? ` (en ${days} día(s))` : ""}.`,
       urgency: "Inmediata",
       actionType: "Oferta",
     };
@@ -341,19 +393,23 @@ export function buildRecommendation(
   if (active.has("renewal_proximity")) {
     return {
       action: "Enviar recordatorio de beneficios antes de la fecha de renovación.",
-      reason: days == null ? "Renovación próxima." : `Renueva en ${days} día(s).`,
-      urgency: "Programada",
+      reason:
+        days == null
+          ? "Renovación próxima."
+          : `Renueva el ${renewalDate}, en ${days} día(s) (ventana configurada: ${window.threshold} días).`,
+      urgency: renewalSoon ? "Esta semana" : "Programada",
       actionType: "Email",
     };
   }
 
   return {
     action: "Mantener seguimiento estándar. No requiere intervención.",
-    reason: "No hay señales de riesgo relevantes.",
+    reason: "Ninguna regla vigente registra puntos de riesgo para este cliente.",
     urgency: "Sin urgencia",
     actionType: "Email",
   };
 }
+
 
 export function mapRuleRow(row: {
   id: string;
