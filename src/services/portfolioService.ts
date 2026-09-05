@@ -90,13 +90,24 @@ export async function fetchPortfolio(): Promise<Portfolio> {
     return {
       subscriber,
       prediction,
-      priorityScore: calculatePriorityScore(subscriber, prediction, subscriberActions.length > 0),
+      priorityScore: calculatePriorityScore(
+        subscriber,
+        prediction,
+        subscriberActions.length > 0,
+        config.rules,
+      ),
       interventionStatus,
       lastActionAt: subscriberActions[0]?.created_at ?? null,
     };
   });
 
-  return { items, actions, byId: new Map(items.map((item) => [item.subscriber.id, item])) };
+  return {
+    items,
+    actions,
+    byId: new Map(items.map((item) => [item.subscriber.id, item])),
+    rules: config.rules,
+    thresholds: config.thresholds,
+  };
 }
 
 /** Recalcula y persiste el Risk Score de todos los suscriptores. */
