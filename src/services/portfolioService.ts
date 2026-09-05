@@ -5,7 +5,9 @@ import { fetchRulesConfig } from "@/services/rulesService";
 import type {
   RetentionAction,
   RiskPrediction,
+  RiskRule,
   RiskSignal,
+  RiskThresholds,
   SignalKey,
   Subscriber,
   SubscriberWithRisk,
@@ -15,6 +17,9 @@ export interface Portfolio {
   items: SubscriberWithRisk[];
   actions: RetentionAction[];
   byId: Map<string, SubscriberWithRisk>;
+  /** Reglas y umbrales vigentes usados para puntuar esta carga. */
+  rules: RiskRule[];
+  thresholds: RiskThresholds;
 }
 
 const OPEN_STATUSES = new Set(["Pendiente", "Programada", "En curso"]);
