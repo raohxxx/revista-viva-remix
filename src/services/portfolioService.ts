@@ -5,7 +5,9 @@ import { fetchRulesConfig } from "@/services/rulesService";
 import type {
   RetentionAction,
   RiskPrediction,
+  RiskRule,
   RiskSignal,
+  RiskThresholds,
   SignalKey,
   Subscriber,
   SubscriberWithRisk,
@@ -15,6 +17,9 @@ export interface Portfolio {
   items: SubscriberWithRisk[];
   actions: RetentionAction[];
   byId: Map<string, SubscriberWithRisk>;
+  /** Reglas y umbrales vigentes usados para puntuar esta carga. */
+  rules: RiskRule[];
+  thresholds: RiskThresholds;
 }
 
 const OPEN_STATUSES = new Set(["Pendiente", "Programada", "En curso"]);
@@ -85,13 +90,24 @@ export async function fetchPortfolio(): Promise<Portfolio> {
     return {
       subscriber,
       prediction,
-      priorityScore: calculatePriorityScore(subscriber, prediction, subscriberActions.length > 0),
+      priorityScore: calculatePriorityScore(
+        subscriber,
+        prediction,
+        subscriberActions.length > 0,
+        config.rules,
+      ),
       interventionStatus,
       lastActionAt: subscriberActions[0]?.created_at ?? null,
     };
   });
 
-  return { items, actions, byId: new Map(items.map((item) => [item.subscriber.id, item])) };
+  return {
+    items,
+    actions,
+    byId: new Map(items.map((item) => [item.subscriber.id, item])),
+    rules: config.rules,
+    thresholds: config.thresholds,
+  };
 }
 
 /** Recalcula y persiste el Risk Score de todos los suscriptores. */
@@ -115,7 +131,12 @@ export async function recalculateScores(): Promise<number> {
       principal_signal_key: prediction.principalSignalKey,
       contributing_signals: prediction.signals as unknown as never,
       recommended_action: prediction.recommendedAction,
-      priority_score: calculatePriorityScore(subscriber, prediction, withAction.has(subscriber.id)),
+      priority_score: calculatePriorityScore(
+        subscriber,
+        prediction,
+        withAction.has(subscriber.id),
+        config.rules,
+      ),
       calculated_at: new Date().toISOString(),
     };
   });
