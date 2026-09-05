@@ -131,7 +131,12 @@ export async function recalculateScores(): Promise<number> {
       principal_signal_key: prediction.principalSignalKey,
       contributing_signals: prediction.signals as unknown as never,
       recommended_action: prediction.recommendedAction,
-      priority_score: calculatePriorityScore(subscriber, prediction, withAction.has(subscriber.id)),
+      priority_score: calculatePriorityScore(
+        subscriber,
+        prediction,
+        withAction.has(subscriber.id),
+        config.rules,
+      ),
       calculated_at: new Date().toISOString(),
     };
   });
