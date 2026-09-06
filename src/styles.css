@@ -106,6 +106,13 @@
   --input: #dfe5ee;
   --ring: #20b7a6;
 
+  --brand-violet: #6a5ae0;
+  --brand-pink: #ec4bb0;
+  --glass-surface: rgba(255, 255, 255, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow: 0 18px 40px -24px rgba(15, 34, 67, 0.45);
+
+
   --risk-low: #159a72;
   --risk-low-soft: #e6f6f0;
   --risk-medium: #f59e0b;
@@ -197,6 +204,42 @@
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }
+
+@utility glass-card {
+  background: var(--glass-surface);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: var(--glass-shadow);
+}
+
+@utility brand-canvas {
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image: var(--brand-canvas-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, white 74%, transparent),
+      color-mix(in oklab, white 62%, transparent)
+    );
+  }
+}
+
 
 @layer base {
   .tabular,
