@@ -1,8 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouterState } from "@tanstack/react-router";
-import { LogOut, Menu, RefreshCw, Search, ShieldCheck, User2 } from "lucide-react";
+import { LogOut, Menu, RefreshCw, Search, User2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
+import bgAsset from "@/assets/vida-bg.jpg.asset.json";
+import { BrandLockup } from "@/components/layout/BrandLockup";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { NavDrawer } from "@/components/layout/NavDrawer";
 import { routeTitle } from "@/components/layout/nav-items";
@@ -152,9 +154,12 @@ function Header() {
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <ShellProvider>
-      <div className="grid h-[100dvh] grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-background">
+      <div
+        className="brand-canvas grid h-[100dvh] grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-background"
+        style={{ ["--brand-canvas-image" as string]: `url(${bgAsset.url})` }}
+      >
         <Header />
-        <main className="min-h-0 min-w-0 overflow-y-auto overflow-x-hidden pb-[env(safe-area-inset-bottom)]">
+        <main className="min-h-0 min-w-0 overflow-x-hidden overflow-y-auto pb-[env(safe-area-inset-bottom)]">
           <div className="mx-auto flex h-full w-full max-w-[1800px] min-w-0 flex-col px-3 py-3 lg:px-5 lg:py-4">
             {children}
           </div>
@@ -163,3 +168,4 @@ export function AppShell({ children }: { children: ReactNode }) {
     </ShellProvider>
   );
 }
+
