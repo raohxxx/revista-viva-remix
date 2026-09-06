@@ -16,6 +16,7 @@ import {
 import { MetricCard } from "@/components/common/MetricCard";
 import { PageHeader } from "@/components/common/PageHeader";
 import { QueryState } from "@/components/common/QueryState";
+import { RetentionDonut } from "@/components/dashboard/RetentionDonut";
 import { DominantSignalBadge } from "@/components/risk/DominantSignalBadge";
 import { PriorityBadge } from "@/components/risk/PriorityBadge";
 import { RiskBadge } from "@/components/risk/RiskBadge";
@@ -104,38 +105,45 @@ function ResumenContent({
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          label="MRR total de la cartera"
-          value={formatCLP(overview.totalMRR)}
-          icon={CircleDollarSign}
-          tooltip="Ingreso mensual recurrente de los suscriptores activos. Los planes anuales se contabilizan como su equivalente mensual."
-          hint={`${formatNumber(overview.totalActive)} suscriptores activos`}
-        />
-        <MetricCard
-          label="MRR en riesgo"
-          value={formatCLP(overview.revenueAtRisk)}
-          icon={TrendingDown}
-          accent="critical"
-          tooltip="Suma del MRR de los suscriptores en riesgo Alto y Crítico. Es una estimación de exposición, no una pérdida confirmada."
-          hint={`${overview.mrrAtRiskPct.toFixed(1)}% del MRR total`}
-        />
-        <MetricCard
-          label="Clientes en riesgo"
-          value={`${formatNumber(overview.highRisk)} (${overview.highRiskPct.toFixed(0)}%)`}
-          icon={Users}
-          accent="high"
-          tooltip="Suscriptores con Risk Score en nivel Alto o Crítico según los umbrales configurados."
-          hint={`${overview.critical} en nivel crítico`}
-        />
-        <MetricCard
-          label="Renovaciones 30 días"
-          value={formatNumber(overview.renewals30d)}
-          icon={CalendarClock}
-          tooltip="Suscriptores cuya renovación ocurre dentro de los próximos 30 días: la ventana donde la gestión tiene mayor efecto."
-          hint={`${overview.churnObserved} cancelaciones registradas`}
+      <section className="grid gap-4 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:col-span-3">
+          <MetricCard
+            label="MRR total de la cartera"
+            value={formatCLP(overview.totalMRR)}
+            icon={CircleDollarSign}
+            tooltip="Ingreso mensual recurrente de los suscriptores activos. Los planes anuales se contabilizan como su equivalente mensual."
+            hint={`${formatNumber(overview.totalActive)} suscriptores activos`}
+          />
+          <MetricCard
+            label="MRR en riesgo"
+            value={formatCLP(overview.revenueAtRisk)}
+            icon={TrendingDown}
+            accent="critical"
+            tooltip="Suma del MRR de los suscriptores en riesgo Alto y Crítico. Es una estimación de exposición, no una pérdida confirmada."
+            hint={`${overview.mrrAtRiskPct.toFixed(1)}% del MRR total`}
+          />
+          <MetricCard
+            label="Clientes en riesgo"
+            value={`${formatNumber(overview.highRisk)} (${overview.highRiskPct.toFixed(0)}%)`}
+            icon={Users}
+            accent="high"
+            tooltip="Suscriptores con Risk Score en nivel Alto o Crítico según los umbrales configurados."
+            hint={`${overview.critical} en nivel crítico`}
+          />
+          <MetricCard
+            label="Renovaciones 30 días"
+            value={formatNumber(overview.renewals30d)}
+            icon={CalendarClock}
+            tooltip="Suscriptores cuya renovación ocurre dentro de los próximos 30 días: la ventana donde la gestión tiene mayor efecto."
+            hint={`${overview.churnObserved} cancelaciones registradas`}
+          />
+        </div>
+        <RetentionDonut
+          retained={Math.max(overview.totalActive - overview.highRisk, 0)}
+          atRisk={overview.highRisk}
         />
       </section>
+
 
       <section className="grid gap-4 lg:grid-cols-3">
         <Card className="border-primary/30 bg-primary/5 lg:col-span-2">
