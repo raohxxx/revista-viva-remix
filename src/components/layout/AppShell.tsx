@@ -51,7 +51,7 @@ function Header() {
   }
 
   return (
-    <header className="grid h-14 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-border bg-surface px-3 lg:px-5">
+    <header className="glass-card grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-none border-0 border-b px-3 lg:px-5">
       <div className="flex min-w-0 items-center gap-2">
         <NavDrawer
           open={navOpen}
@@ -67,22 +67,16 @@ function Header() {
             </Button>
           }
         />
-        <span className="hidden h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground sm:grid">
-          <ShieldCheck className="h-4 w-4" aria-hidden />
-        </span>
-        <span className="hidden text-sm font-semibold tracking-tight text-foreground sm:inline">
-          VIDA
-        </span>
+        <BrandLockup title={title} />
       </div>
 
-      <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-foreground" aria-live="polite">
+      <div className="min-w-0 sm:hidden">
+        <p className="truncate text-xs font-semibold tracking-[0.16em] text-foreground uppercase">
           {title}
         </p>
-        <p className="hidden truncate text-[11px] text-muted-foreground sm:block">
-          Análisis de churn · RevistaViva
-        </p>
       </div>
+      <div className="hidden sm:block" />
+
 
       <div className="flex items-center gap-1.5">
         {showPeriod && (
