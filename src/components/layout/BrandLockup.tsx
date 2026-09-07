@@ -14,15 +14,16 @@ export function BrandLockup({ title }: BrandLockupProps) {
       />
       <span className="hidden h-7 w-px shrink-0 bg-gradient-to-b from-brand-teal via-brand-blue to-brand-magenta sm:block" />
       <div className="hidden min-w-0 flex-col sm:flex">
+        <p className="truncate text-[11px] font-semibold tracking-[0.18em] text-foreground uppercase sm:text-xs">
+          Análisis de churn
+        </p>
         <p
-          className="truncate text-[11px] font-semibold tracking-[0.18em] text-foreground uppercase sm:text-xs"
+          className="truncate text-[9px] tracking-[0.24em] text-muted-foreground uppercase"
           aria-live="polite"
         >
-          {title}
+          {title} · Una revista para vivir mejor · Online
         </p>
-        <p className="truncate text-[9px] tracking-[0.24em] text-muted-foreground uppercase">
-          Una revista para vivir mejor · Online
-        </p>
+
       </div>
     </div>
   );
