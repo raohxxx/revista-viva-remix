@@ -234,8 +234,8 @@
     z-index: -1;
     background: linear-gradient(
       180deg,
-      color-mix(in oklab, white 74%, transparent),
-      color-mix(in oklab, white 62%, transparent)
+      color-mix(in oklab, white 62%, transparent),
+      color-mix(in oklab, white 48%, transparent)
     );
   }
 }
